@@ -1,125 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Echoes of Silence</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Nightmare | Face Your Fears</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --accent-red: #8b0000;
+            --neon-glow: #ff0000;
+            --text-gray: #b0b0b0;
+            --transition: all 0.4s ease;
+        }
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0a0a0a;
-  color: white;
-  scroll-behavior: smooth;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-section {
-  padding: 60px 20px;
-  text-align: center;
-}
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
 
-h1, h2 {
-  color: #ff2e2e;
-  text-shadow: 0 0 10px red;
-}
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 9999;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
 
-.hero {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
+        section {
+            padding: 80px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: var(--transition);
+        }
 
-.glitch {
-  font-size: 40px;
-  animation: glitch 1s infinite;
-}
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-@keyframes glitch {
-  0% { text-shadow: 2px 2px red; }
-  50% { text-shadow: -2px -2px cyan; }
-  100% { text-shadow: 2px 2px red; }
-}
+        /* Landing Section */
+        #hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle, #1a0000 0%, #050505 100%);
+            opacity: 1;
+            transform: none;
+        }
 
-.card {
-  background: #111;
-  padding: 20px;
-  margin: 15px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(255,0,0,0.3);
-}
+        h1 {
+            font-size: 3.5rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-glow), 0 0 20px var(--neon-glow);
+            animation: flicker 3s infinite;
+        }
 
-footer {
-  padding: 20px;
-  background: black;
-}
-</style>
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--text-gray);
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        /* Story Section */
+        .story-text {
+            font-style: italic;
+            border-left: 3px solid var(--accent-red);
+            padding-left: 20px;
+            color: var(--text-gray);
+        }
+
+        /* Characters */
+        .char-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .char-card {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            padding: 20px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .char-card:hover {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 15px rgba(139, 0, 0, 0.3);
+        }
+
+        .char-card h3 {
+            color: var(--accent-red);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        /* Gameplay & Features */
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '☢';
+            position: absolute;
+            left: 0;
+            color: var(--accent-red);
+        }
+
+        .mechanic-box {
+            background: #111;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px dashed var(--accent-red);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #1a1a1a;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .socials a {
+            color: var(--text-gray);
+            text-decoration: none;
+            margin: 0 10px;
+            transition: var(--transition);
+        }
+
+        .socials a:hover {
+            color: var(--neon-glow);
+        }
+
+        /* Animations */
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0.3; }
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
+            border-bottom: 2px solid var(--accent-red);
+            display: inline-block;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            section { padding: 50px 20px; }
+        }
+    </style>
 </head>
-
 <body>
 
-<section class="hero">
-  <h1 class="glitch">Echoes of Silence</h1>
-  <p>Some memories don’t fade… they haunt.</p>
-</section>
+    <section id="hero">
+        <h1>PROJECT NIGHTMARE</h1>
+        <p class="tagline">FACE YOUR DEEPEST FEARS</p>
+    </section>
 
-<section>
-  <h2>Story</h2>
-  <p>
-    Arjun wakes up in a fog-covered mountain town with his wife Meera and daughter Tara.
-    Everything seems normal… until reality begins to break.
-    Strange ticking sounds echo in the air, and the town feels abandoned.
-    As he explores deeper, he discovers a forgotten radiation disaster—
-    and a truth his mind refuses to accept.
-  </p>
-</section>
+    <section id="story">
+        <h2>THE TRUTH BURNS</h2>
+        <div class="story-text">
+            <p>Arjun thought he was protecting Meera and Tara. In the silence of the abandoned mountain town, the static of a Geiger counter is the only pulse left. But memories are like radiation—invisible, silent, and deadly. Why do they keep repeating the same words? Why is the sky always red in Tara's drawings? Search for the truth, before the hallucinations consume what’s left of your mind.</p>
+        </div>
+    </section>
 
-<section>
-  <h2>Characters</h2>
+    <section id="characters">
+        <h2>SURVIVORS?</h2>
+        <div class="char-grid">
+            <div class="char-card">
+                <h3>Arjun</h3>
+                <p>A man fractured by guilt. He navigates the fog of reality, desperately trying to save a family that might already be lost to the shadows of the past.</p>
+            </div>
+            <div class="char-card">
+                <h3>Meera</h3>
+                <p>The calm in the storm. Her caring nature masks a disturbing glitch—a repetitive echo of a woman shielding her husband from a truth too horrific to face.</p>
+            </div>
+            <div class="char-card">
+                <h3>Tara</h3>
+                <p>The innocent observer. Her cryptic drawings of "The Black Hill" are the only map Arjun has left in this wasteland of broken memories.</p>
+            </div>
+        </div>
+    </section>
 
-  <div class="card">
-    <h3>Arjun</h3>
-    <p>A mentally disturbed father trapped between reality and hallucination.</p>
-  </div>
+    <section id="gameplay">
+        <h2>GAMEPLAY</h2>
+        <p>Experience psychological horror through minimal visuals and maximum atmosphere.</p>
+        <div class="mechanic-box">
+            <strong>The Geiger Mechanic:</strong> Follow the <em>"tik... tik... tik..."</em> sound. The faster it pulses, the closer you are to the truth—or your demise. Use notes, photographs, and emergency radio broadcasts to piece together the 1986 disaster.
+        </div>
+    </section>
 
-  <div class="card">
-    <h3>Meera</h3>
-    <p>A calm wife who repeats words, hiding a terrifying truth.</p>
-  </div>
+    <section id="features">
+        <h2>FEATURES</h2>
+        <ul class="feature-list">
+            <li><strong>Offline Experience:</strong> Immerse yourself anywhere, no connection required.</li>
+            <li><strong>Story Driven:</strong> A deep, emotional narrative about loss and trauma.</li>
+            <li><strong>Psychological Horror:</strong> No cheap jump scares; only creeping dread.</li>
+            <li><strong>Minimal Graphics:</strong> High-atmosphere aesthetic optimized for mobile performance.</li>
+        </ul>
+    </section>
 
-  <div class="card">
-    <h3>Tara</h3>
-    <p>An innocent child whose drawings reveal hidden reality.</p>
-  </div>
-</section>
+    <footer>
+        <p>Made by [Your Name]</p>
+        <div class="socials">
+            <a href="#">TWITTER</a> | <a href="#">INSTAGRAM</a> | <a href="#">DISCORD</a>
+        </div>
+    </footer>
 
-<section>
-  <h2>Gameplay</h2>
-  <p>
-    Explore abandoned locations, solve puzzles, and uncover hidden truths
-    while experiencing psychological horror and hallucinations.
-  </p>
-</section>
+    <script>
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1
+        };
 
-<section>
-  <h2>Features</h2>
-  <p>
-    Offline story-driven gameplay • Psychological horror • Minimal graphics • Android optimized
-  </p>
-</section>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
 
-<section>
-  <h2>Atmosphere</h2>
-  <p>
-    “tik… tik… tik…” — The Geiger counter never stops.  
-    “Emergency evacuation… radiation levels rising…”
-  </p>
-</section>
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
 
-<footer>
-  <p>Made by Ayush</p>
-</footer>
-
+        // Subtle Audio-Visual feedback (Simulating Geiger click on scroll)
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            let st = window.pageYOffset || document.documentElement.scrollTop;
+            if (Math.abs(st - lastScrollTop) > 50) {
+                // This simulates the "vibe" of the game
+                lastScrollTop = st <= 0 ? 0 : st;
+            }
+        }, false);
+    </script>
 </body>
 </html>
