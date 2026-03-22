@@ -9,15 +9,15 @@
             --bg-black: #020202;
             --blood-red: #ff0000;
             --neon-glow: 0 0 20px #ff0000, 0 0 40px #8b0000;
-            --card-border-glow: 0 0 15px rgba(255, 0, 0, 0.6);
-            --text-gray: #b0b0b0;
+            --card-glow: 0 0 15px rgba(255, 0, 0, 0.7);
+            --text-gray: #cccccc;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -28,7 +28,19 @@
             scroll-behavior: smooth;
         }
 
-        /* Nav Bar Fixed */
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 4px;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* Navigation */
         nav {
             position: fixed;
             top: 0;
@@ -36,14 +48,15 @@
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(10px);
             z-index: 1000;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+            padding: 15px 0;
+            border-bottom: 2px solid var(--blood-red);
+            box-shadow: 0 0 15px var(--blood-red);
         }
 
         .nav-links {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 12px;
             list-style: none;
         }
 
@@ -53,10 +66,10 @@
             font-size: 10px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
         }
 
-        /* Hero Section with Constant Glitch */
+        /* CONSTANT GLITCH EFFECT */
         #home {
             height: 100vh;
             display: flex;
@@ -67,59 +80,52 @@
             padding: 20px;
         }
 
-        .glitch-wrapper {
-            position: relative;
-        }
-
-        .main-title {
-            font-size: 2.5rem; /* Reduced size for better mobile fit */
+        .glitch-text {
+            font-size: 2.8rem;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #fff;
-            text-shadow: var(--neon-glow);
             position: relative;
-            animation: glitch-skew 1s infinite linear alternate-reverse;
+            color: white;
+            text-shadow: var(--neon-glow);
+            letter-spacing: 3px;
         }
 
-        .main-title::before, .main-title::after {
+        .glitch-text::before, .glitch-text::after {
             content: "DEAD FREQUENCY";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.8;
+            background: var(--bg-black);
         }
 
-        .main-title::before {
-            color: #0ff;
-            z-index: -1;
-            animation: glitch-anim 0.3s infinite linear alternate-reverse;
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
         }
 
-        .main-title::after {
-            color: #f0f;
-            z-index: -2;
-            animation: glitch-anim2 0.3s infinite linear alternate-reverse;
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9, 2px 2px #ff0000;
+            animation: glitch-anim2 1s infinite linear alternate-reverse;
         }
 
         @keyframes glitch-anim {
-            0% { clip: rect(10px, 9999px, 20px, 0); transform: translate(-2px); }
-            100% { clip: rect(30px, 9999px, 40px, 0); transform: translate(2px); }
-        }
-        @keyframes glitch-anim2 {
-            0% { clip: rect(50px, 9999px, 60px, 0); transform: translate(2px); }
-            100% { clip: rect(70px, 9999px, 80px, 0); transform: translate(-2px); }
-        }
-        @keyframes glitch-skew {
-            0% { transform: skew(0deg); }
-            20% { transform: skew(3deg); }
-            80% { transform: skew(-3deg); }
-            100% { transform: skew(0deg); }
+            0% { clip: rect(31px, 9999px, 94px, 0); }
+            20% { clip: rect(62px, 9999px, 42px, 0); }
+            100% { clip: rect(15px, 9999px, 85px, 0); }
         }
 
-        /* Content Sections */
+        @keyframes glitch-anim2 {
+            0% { clip: rect(10px, 9999px, 20px, 0); transform: skew(0.8deg); }
+            50% { clip: rect(80px, 9999px, 90px, 0); transform: skew(-0.8deg); }
+            100% { clip: rect(40px, 9999px, 50px, 0); transform: skew(0.4deg); }
+        }
+
+        /* Sections */
         section {
-            padding: 80px 25px;
-            max-width: 500px;
+            padding: 100px 20px 40px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
@@ -127,130 +133,103 @@
             text-align: center;
             font-size: 2rem;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            margin-bottom: 40px;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
             color: #fff;
+            text-shadow: 0 0 10px var(--blood-red);
         }
 
-        .red-line {
-            width: 60px;
-            height: 3px;
+        .glow-line {
+            width: 100px;
+            height: 4px;
             background: var(--blood-red);
-            margin: -35px auto 40px;
-            box-shadow: 0 0 15px var(--blood-red);
-            border-radius: 10px;
+            margin: 10px auto 50px;
+            box-shadow: 0 0 20px var(--blood-red);
         }
 
-        /* HIGH GLOW CARD DESIGN */
+        /* PROFESSIONAL CARDS (Image Style) */
         .card {
-            background: rgba(10, 0, 0, 0.4);
-            border: 2px solid var(--blood-red); /* Stronger border */
-            border-radius: 15px;
-            padding: 40px 25px;
+            background: rgba(10, 0, 0, 0.7);
+            border: 2px solid var(--blood-red);
+            border-radius: 12px;
+            padding: 35px 25px;
             margin-bottom: 30px;
             text-align: center;
-            box-shadow: var(--card-border-glow); /* Initial glow */
-            transition: 0.4s ease;
+            box-shadow: var(--card-glow);
+            transition: 0.3s;
         }
 
         .card:hover {
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8); /* Intense glow on hover */
-            transform: scale(1.02);
+            box-shadow: 0 0 35px rgba(255, 0, 0, 1);
+            transform: scale(1.03);
         }
 
         .char-icon {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             border: 2px solid var(--blood-red);
             margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: var(--blood-red);
             box-shadow: var(--neon-glow);
-            background: #000;
         }
 
-        .name {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .role {
-            color: var(--blood-red);
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            display: block;
-        }
-
-        .desc {
-            color: var(--text-gray);
-            font-size: 0.95rem;
-            line-height: 1.7;
-        }
+        .name { font-size: 1.6rem; margin-bottom: 5px; }
+        .role { color: var(--blood-red); text-transform: uppercase; font-size: 0.9rem; font-weight: bold; letter-spacing: 2px; display: block; margin-bottom: 15px; }
+        .desc { color: var(--text-gray); font-size: 0.9rem; line-height: 1.6; }
 
         .highlight-red {
             color: var(--blood-red);
-            text-shadow: 0 0 5px var(--blood-red);
+            text-shadow: 0 0 8px var(--blood-red);
             font-weight: bold;
         }
 
-        /* Gameplay Steps */
+        /* How to Play Steps */
         .step-num {
-            font-size: 3rem;
-            color: var(--blood-red);
+            font-size: 3.5rem;
             font-weight: 900;
+            color: var(--blood-red);
             text-shadow: var(--neon-glow);
-            margin-bottom: 10px;
+            line-height: 1;
         }
 
         /* Footer */
         footer {
-            padding: 60px 20px;
+            padding: 80px 20px;
             text-align: center;
-            border-top: 1px solid #222;
+            background: #000;
+            border-top: 2px solid var(--blood-red);
         }
 
-        .socials {
+        .social-links {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin: 25px 0;
+            margin: 30px 0;
         }
 
-        .social-link {
+        .social-links a {
             color: #fff;
             text-decoration: none;
             font-size: 0.8rem;
-            padding: 8px 15px;
-            border: 1px solid #333;
+            padding: 10px 15px;
+            border: 1px solid var(--blood-red);
             border-radius: 5px;
             transition: 0.3s;
         }
 
-        .social-link:hover {
-            border-color: var(--blood-red);
+        .social-links a:hover {
             background: var(--blood-red);
             box-shadow: var(--neon-glow);
         }
 
-        /* UI Smoothness */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: 1s all ease;
-        }
+        .reveal { opacity: 0; transform: translateY(40px); transition: 0.8s all ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
 
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
     </style>
 </head>
 <body>
@@ -261,70 +240,95 @@
             <li><a href="#story">Story</a></li>
             <li><a href="#characters">Characters</a></li>
             <li><a href="#gameplay">Gameplay</a></li>
+            <li><a href="#features">Features</a></li>
         </ul>
     </nav>
 
     <section id="home">
-        <div class="glitch-wrapper">
-            <h1 class="main-title">DEAD FREQUENCY</h1>
-        </div>
-        <p style="margin-top: 20px; color: #666; letter-spacing: 5px; font-size: 0.8rem;">BY <span class="highlight-red">AYUSH MAURYA</span></p>
+        <h1 class="glitch-text">DEAD FREQUENCY</h1>
+        <p style="margin-top: 25px; color: #777; letter-spacing: 4px; font-size: 0.8rem;">
+            A PSYCHOLOGICAL THRILLER BY <span class="highlight-red">AYUSH MAURYA</span>
+        </p>
     </section>
 
     <section id="story" class="reveal">
-        <h2 class="section-header">The Beginning</h2>
-        <div class="red-line"></div>
+        <h2 class="section-header">THE BEGINNING</h2>
+        <div class="glow-line"></div>
         <div class="card">
-            <p class="desc">In the summer of <span class="highlight-red">1986</span>, a mountain town vanished. No survivors. No explanation. Only <span class="highlight-red">Static</span> left behind.</p>
-            <br>
-            <p class="desc">You play as Arjun, returning to the exclusion zone. But the town isn't empty. It's filled with <span class="highlight-red">Broken Memories</span> and frequencies that shouldn't exist.</p>
+            <p class="desc">In the summer of <span class="highlight-red">1986</span>, a mountain town vanished. No explanation, only the chilling <span class="highlight-red">Static</span> of a radio. You return as Arjun, but the town isn't empty—it's filled with memories that refuse to die.</p>
         </div>
     </section>
 
     <section id="characters" class="reveal">
-        <h2 class="section-header">Lost Souls</h2>
-        <div class="red-line"></div>
+        <h2 class="section-header">LOST SOULS</h2>
+        <div class="glow-line"></div>
         
         <div class="card">
             <div class="char-icon">?</div>
             <h3 class="name">Arjun</h3>
-            <span class="role">The Witness</span>
-            <p class="desc">Drawn back by a signal only he can hear. Is he looking for the truth, or running from his own <span class="highlight-red">Guilt</span>?</p>
+            <span class="role">THE PLAYER</span>
+            <p class="desc">Chasing shadows in the fog. He can no longer tell the difference between <span class="highlight-red">Reality</span> and his own guilt.</p>
         </div>
 
         <div class="card">
             <div class="char-icon">?</div>
             <h3 class="name">Meera</h3>
-            <span class="role">The Echo</span>
-            <p class="desc">A presence that feels like a fading photograph. She repeats warnings of <span class="highlight-red">Radiation</span> that happened decades ago.</p>
+            <span class="role">THE WIFE</span>
+            <p class="desc">She appears in flashes, repeating the same <span class="highlight-red">Emergency Warnings</span> from the day of the disaster.</p>
+        </div>
+
+        <div class="card">
+            <div class="char-icon">?</div>
+            <h3 class="name">Tara</h3>
+            <span class="role">THE DAUGHTER</span>
+            <p class="desc">Innocent but mysterious. Her drawings of a <span class="highlight-red">Red Sky</span> and a "Black Hill" are the keys to the truth.</p>
         </div>
     </section>
 
     <section id="gameplay" class="reveal">
-        <h2 class="section-header">How To Play</h2>
-        <div class="red-line"></div>
+        <h2 class="section-header">HOW TO PLAY</h2>
+        <div class="glow-line"></div>
         
         <div class="card">
             <div class="step-num">01</div>
             <h3 class="name">EXPLORE</h3>
-            <p class="desc">Navigate abandoned facilities using your <span class="highlight-red">Geiger Counter</span> as a compass. The clicks are your only guide.</p>
+            <p class="desc">Navigate through burnt patches and abandoned cars. Use the <span class="highlight-red">Geiger Counter</span> to find safe paths.</p>
         </div>
 
         <div class="card">
             <div class="step-num">02</div>
-            <div class="name">LISTEN</div>
-            <p class="desc">Tune your radio to catch <span class="highlight-red">Dead Frequencies</span>. Decipher the messages from the past to unlock the future.</p>
+            <h3 class="name">SOLVE</h3>
+            <p class="desc">Decrypt hidden notes and <span class="highlight-red">Hospital Records</span> to piece together the radiation accident.</p>
+        </div>
+
+        <div class="card">
+            <div class="step-num">03</div>
+            <h3 class="name">SURVIVE</h3>
+            <p class="desc">When the radio static gets loud, <span class="highlight-red">Don't Look Back</span>. The frequency is closing in.</p>
+        </div>
+    </section>
+
+    <section id="features" class="reveal">
+        <h2 class="section-header">FEATURES</h2>
+        <div class="glow-line"></div>
+        <div class="card">
+            <p class="role">• OFFLINE STORY DRIVEN</p>
+            <p class="role">• PSYCHOLOGICAL HORROR</p>
+            <p class="role">• MINIMAL GRAPHICS STYLE</p>
+            <p class="role">• RADIATION MECHANICS</p>
         </div>
     </section>
 
     <footer>
-        <h3 class="highlight-red" style="letter-spacing: 3px;">AYUSH MAURYA</h3>
-        <div class="socials">
-            <a href="https://www.instagram.com/eternalcalmness?igsh=ZmxuN2phbGh1cGl2" target="_blank" class="social-link">INSTAGRAM</a>
-            <a href="https://youtube.com/@aasuffx?si=Hd6kvCF95_GRnKXV" target="_blank" class="social-link">YOUTUBE</a>
-            <a href="https://discord.gg/thenestorio" target="_blank" class="social-link">DISCORD</a>
+        <h3 class="highlight-red" style="letter-spacing: 5px; font-size: 1.4rem;">AYUSH MAURYA</h3>
+        <p style="color: #555; font-size: 0.7rem; margin-top: 10px;">PRODUCER | DESIGNER</p>
+        
+        <div class="social-links">
+            <a href="https://www.instagram.com/eternalcalmness?igsh=ZmxuN2phbGh1cGl2" target="_blank">INSTAGRAM</a>
+            <a href="https://youtube.com/@aasuffx?si=Hd6kvCF95_GRnKXV" target="_blank">YOUTUBE</a>
+            <a href="https://discord.gg/thenestorio" target="_blank">DISCORD</a>
         </div>
-        <p style="font-size: 0.6rem; color: #444;">© 2026 DEAD FREQUENCY PROJECT. HANDCRAFTED FOR MOBILE.</p>
+        <p style="font-size: 0.6rem; color: #333;">© 2026 DEAD FREQUENCY PROJECT</p>
     </footer>
 
     <script>
@@ -334,16 +338,15 @@
             for (var i = 0; i < reveals.length; i++) {
                 var windowHeight = window.innerHeight;
                 var elementTop = reveals[i].getBoundingClientRect().top;
-                var elementVisible = 150;
-                if (elementTop < windowHeight - elementVisible) {
+                if (elementTop < windowHeight - 100) {
                     reveals[i].classList.add("active");
                 }
             }
         }
-
         window.addEventListener("scroll", reveal);
+        reveal(); // Run once to check visibility
 
-        // Smooth nav scroll
+        // Smooth nav
         document.querySelectorAll('nav a').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
