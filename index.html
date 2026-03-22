@@ -139,13 +139,28 @@
             text-shadow: 0 0 10px var(--blood-red);
         }
 
-        .glow-line {
-            width: 100px;
-            height: 4px;
-            background: var(--blood-red);
-            margin: 10px auto 50px;
-            box-shadow: 0 0 20px var(--blood-red);
-        }
+.glow-line {
+    width: 200px; /* Length aap adjust kar sakte ho */
+    height: 2px;
+    margin: 10px auto 40px;
+    /* Yeh gradient beech mein red rakhega aur sides pe transparent (fade) */
+    background: linear-gradient(to right, transparent, var(--blood-red) 50%, transparent);
+    box-shadow: 0 0 15px var(--blood-red);
+    position: relative;
+    border: none;
+}
+
+/* Yeh extra glow dega line ke center mein */
+.glow-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 25%;
+    width: 50%; height: 100%;
+    background: var(--blood-red);
+    filter: blur(5px);
+    box-shadow: 0 0 20px var(--blood-red);
+}
+
 
         /* PROFESSIONAL CARDS (Image Style) */
         .card {
