@@ -140,12 +140,16 @@
         }
 
         .glow-line {
-            width: 100px;
-            height: 4px;
-            background: var(--blood-red);
-            margin: 10px auto 50px;
-            box-shadow: 0 0 20px var(--blood-red);
-        }
+    width: 80%;
+    height: 3px;
+    margin: -10px auto 50px;
+    background: radial-gradient(circle, var(--blood-red) 0%, rgba(255, 0, 0, 0.4) 50%, transparent 100%);
+    box-shadow: 0 0 20px var(--blood-red), 0 0 10px var(--blood-red);
+    border-radius: 50%; /* Isse corners ekdum sharp/thin ho jate hain */
+    position: relative;
+    border: none;
+}
+
 
         /* PROFESSIONAL CARDS (Image Style) */
         .card {
