@@ -245,6 +245,23 @@
         .reveal { opacity: 0; transform: translateY(40px); transition: 0.8s all ease; }
         .reveal.active { opacity: 1; transform: translateY(0); }
 
+
+        /* PLAY SECTION */
+        .play-btn {
+            display: inline-block; background: var(--blood-red); color: #fff; border: 0;
+            padding: 16px 34px; font-size: 1rem; font-weight: 900; letter-spacing: 3px;
+            border-radius: 6px; cursor: pointer; box-shadow: var(--neon-glow); text-transform: uppercase;
+        }
+        .play-btn:active { transform: scale(0.96); }
+        .play-alt { display: block; margin-top: 18px; color: #888; font-size: 0.75rem; letter-spacing: 1px; text-decoration: underline; }
+        .play-tips { margin-top: 22px; text-align: left; color: var(--text-gray); font-size: 0.8rem; line-height: 1.8; }
+        #gameOverlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; }
+        #gameOverlay.open { display: block; }
+        #gameOverlay iframe { width: 100%; height: 100%; border: 0; display: block; background: #000; }
+        #gameClose {
+            position: absolute; top: 8px; right: 8px; z-index: 2; background: rgba(0,0,0,.6); color: #fff;
+            border: 1px solid var(--blood-red); border-radius: 6px; padding: 6px 12px; font-size: 12px; letter-spacing: 1px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -255,6 +272,7 @@
             <li><a href="#story">Story</a></li>
             <li><a href="#characters">Characters</a></li>
             <li><a href="#gameplay">Gameplay</a></li>
+            <li><a href="#play" style="color:#ff0000">Play</a></li>
             <li><a href="#features">Features</a></li>
         </ul>
     </nav>
@@ -323,6 +341,27 @@
         </div>
     </section>
 
+    <section id="play" class="reveal">
+        <h2 class="section-header">PLAY</h2>
+        <div class="glow-line"></div>
+        <div class="card">
+            <span class="role">DEMO &middot; CHAPTERS 1&ndash;3</span>
+            <h3 class="name">GHAR CHALO</h3>
+            <p class="desc" style="margin-bottom:24px">Ghar se nikalo, khaali kasbe se guzro, aur jungle ke paar jao. <span class="highlight-red">Geiger</span> ki awaaz sunte raho.</p>
+            <button class="play-btn" id="playBtn">&#9654; PLAY FULLSCREEN</button>
+            <a class="play-alt" href="play/" target="_blank" rel="noopener">ya naye tab mein kholo</a>
+            <div class="play-tips">
+                &bull; Phone ko <span class="highlight-red">landscape</span> mein rakho<br>
+                &bull; Left side joystick, right side drag se idhar-udhar dekho<br>
+                &bull; Headphones lagao, awaaz zaroori hai
+            </div>
+        </div>
+    </section>
+
+    <div id="gameOverlay" aria-hidden="true">
+        <button id="gameClose">&#10005; EXIT</button>
+    </div>
+
     <section id="features" class="reveal">
         <h2 class="section-header">FEATURES</h2>
         <div class="glow-line"></div>
@@ -370,6 +409,35 @@
                 });
             });
         });
+
+        // Game launcher
+        (function () {
+            var ov = document.getElementById('gameOverlay'), frame = null;
+            function openGame() {
+                if (!frame) {
+                    frame = document.createElement('iframe');
+                    frame.src = 'play/';
+                    frame.setAttribute('allow', 'fullscreen; autoplay; screen-wake-lock');
+                    frame.setAttribute('allowfullscreen', '');
+                    ov.insertBefore(frame, ov.firstChild);
+                }
+                ov.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                var f = ov.requestFullscreen || ov.webkitRequestFullscreen;
+                try { if (f) { var p = f.call(ov); if (p && p.catch) p.catch(function () {}); } } catch (e) {}
+                try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(function () {}); } catch (e) {}
+            }
+            function closeGame() {
+                if (frame) { frame.remove(); frame = null; }
+                ov.classList.remove('open');
+                document.body.style.overflow = '';
+                var ex = document.exitFullscreen || document.webkitExitFullscreen;
+                try { if (document.fullscreenElement && ex) ex.call(document); } catch (e) {}
+                try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+            }
+            document.getElementById('playBtn').addEventListener('click', openGame);
+            document.getElementById('gameClose').addEventListener('click', closeGame);
+        })();
     </script>
 </body>
 </html>
