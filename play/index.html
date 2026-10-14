@@ -765,12 +765,30 @@ const WHO={arjun:'ARJUN',meera:'MEERA',tara:'TARA',radio:'RADIO'};
 function say(txt,who,ms){dlg.q.push({txt:txt,who:who||'arjun',ms:ms||Math.max(2400,txt.length*70)});}
 function seq(list){list.forEach(a=>say(a[2],a[1],a[3]));}
 function dlgBusy(){return !!dlg.cur||dlg.q.length>0;}
+const VOICE={
+ 'Subah ho gayi… sab kuch normal lag raha hai.':'arjun_01',
+ 'Haan… aa raha hoon.':'arjun_02',
+ 'Yeh line… maine abhi bhi toh suni thi.':'arjun_03',
+ 'Chai… na garam hai, na thandi.':'arjun_04',
+ 'Chai… na garam hai, na thandi. Bas cup haath mein hai.':'arjun_05',
+ 'Ghadi ruki hui hai. Phir bhi second ki sui tik… tik… kar rahi hai.':'arjun_06'
+};
+let voiceA=null;
+function playVoice(n){
+  try{if(voiceA){voiceA.pause();voiceA=null;}}catch(e){}
+  const k=VOICE[n.txt];if(!k)return;
+  try{
+    const a=new Audio('audio/'+k+'.mp3');a.volume=1;voiceA=a;
+    a.addEventListener('loadedmetadata',()=>{if(dlg.cur===n&&isFinite(a.duration))dlg.t=Math.max(dlg.t,a.duration+0.5);});
+    const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{});
+  }catch(e){}
+}
 function dlgUpdate(dt){
   const el=$('sub');
   if(dlg.cur){dlg.t-=dt;if(dlg.t<=0){dlg.cur=null;dlg.gap=0.3;el.style.opacity=0;}}
   else if(dlg.q.length){
     dlg.gap-=dt;
-    if(dlg.gap<=0){const n=dlg.q.shift();dlg.cur=n;dlg.t=n.ms/1000;el.className=n.who;$('who').textContent=WHO[n.who];$('line').textContent=n.txt;el.style.opacity=1;}
+    if(dlg.gap<=0){const n=dlg.q.shift();dlg.cur=n;dlg.t=n.ms/1000;el.className=n.who;$('who').textContent=WHO[n.who];$('line').textContent=n.txt;el.style.opacity=1;playVoice(n);}
   }
 }
 function later(ms,fn){setTimeout(()=>{if(!G.ended)fn();},ms);}
