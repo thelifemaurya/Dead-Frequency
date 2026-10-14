@@ -1058,7 +1058,7 @@ function renderMirror(){
   const vis=mHide.map(m=>m.visible),mv=meera.visible,tv=taraSit.visible;
   mHide.forEach(m=>{m.visible=false;});
   arjunAv.position.set(P.x,0,P.z);arjunAv.rotation.y=yaw+Math.PI;arjunAv.visible=true;
-  if(G.mirrorAlone>0){meera.visible=false;taraSit.visible=false;}
+  meera.visible=false;taraSit.visible=false; /* reflection never shows Meera/Tara; only the scripted ghost does */
   if(G.mirrorGhost>0){meera3.position.set(P.x+Math.sin(yaw)*1.4,0,P.z+Math.cos(yaw)*1.4);meera3.rotation.y=yaw+Math.PI;meera3.visible=true;}
   renderer.setRenderTarget(mrt);renderer.render(scene,mcam);
   mHide.forEach((m,i)=>{m.visible=vis[i];});
