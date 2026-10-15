@@ -6,7 +6,7 @@
 /* Layout: black letterbox, a 16:9 cinematic frame inside it. Everything in the HUD is sized in em so it scales with the frame. */
 :root{
   --bg:#000; --ink:#eadfc3; --dim:#9b8b69; --paper:#d9ccaa; --paper-ink:#2a2118;
-  --rust:#c2512f; --geiger:#a8bd6c; --meera:#f0b9a2; --tara:#f4d67e; --radio:#9fd08a; --arjun:#c3b99f;
+  --rust:#c2512f; --geiger:#a8bd6c; --meera:#f0b9a2; --tara:#f4d67e; --radio:#9fd08a; --arjun:#e6dcc3;
   --hud:'VT323','Courier New',monospace; --type:'Special Elite','Courier New',monospace;
   color-scheme:dark;
 }
@@ -17,43 +17,43 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--hud);overf
 #wrap{position:fixed;inset:0;background:#000;touch-action:none}
 #frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:min(calc(100vw - 32px),calc(100vh * 1.7778));width:min(calc(100vw - 32px),calc(100dvh * 1.7778));
-  aspect-ratio:16/9;font-size:calc(var(--fw,800px) / 40);background:#0b0806;overflow:hidden}
+  aspect-ratio:16/9;font-size:calc(var(--fw,800px) / 34);background:#0b0806;overflow:hidden}
 #gl{display:block;width:100%;height:100%;image-rendering:pixelated}
 #hud{position:absolute;inset:0;pointer-events:none}
-#obj{position:absolute;top:.6em;left:.8em;max-width:46%;font-size:1.1em;line-height:1.1;white-space:pre-line;color:var(--ink);
-  background:rgba(8,6,4,.5);padding:.3em .6em;border-left:.15em solid var(--rust);opacity:0;transition:opacity .6s}
+#obj{position:absolute;top:.6em;left:.8em;max-width:46%;font-size:1.15em;line-height:1.15;white-space:pre-line;color:#fff2d0;
+  background:rgba(8,6,4,.78);padding:.35em .7em;text-shadow:0 .08em 0 #000;border-left:.15em solid var(--rust);opacity:0;transition:opacity .6s}
 #obj.on{opacity:1}
-#compass{position:absolute;top:.6em;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:.3em;font-size:1em;color:var(--dim);opacity:0;transition:opacity .4s}
+#compass{position:absolute;top:.6em;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:.3em;font-size:1.05em;color:var(--ink);text-shadow:0 .08em 0 #000;opacity:0;transition:opacity .4s}
 #compass.on{opacity:.9}
 #cmp{width:1.4em;height:1.4em;fill:var(--ink);transition:transform .15s linear}
 #tr{position:absolute;top:.6em;right:.8em;display:flex;gap:.5em;align-items:center}
-#notesBtn{pointer-events:auto;font:inherit;font-size:1em;color:var(--ink);background:rgba(8,6,4,.6);border:.12em solid var(--dim);padding:.15em .5em;cursor:pointer;min-height:2em}
+#notesBtn{pointer-events:auto;font:inherit;font-size:1.05em;color:#fff2d0;background:rgba(8,6,4,.8);border:.12em solid var(--dim);padding:.15em .5em;cursor:pointer;min-height:2em}
 button:focus-visible{outline:3px solid var(--geiger);outline-offset:2px}
 #gz{display:flex;gap:.15em;align-items:flex-end;height:1.3em}
 #gz i{display:block;width:.28em;background:#3a3a28;height:.35em}
 #gz i:nth-child(2){height:.55em}#gz i:nth-child(3){height:.75em}#gz i:nth-child(4){height:.95em}#gz i:nth-child(5){height:1.25em}
 #gz i.on{background:var(--geiger)}
 #gdot{width:.5em;height:.5em;border-radius:50%;background:var(--geiger);opacity:0}
-#sub{position:absolute;left:50%;transform:translateX(-50%);bottom:12%;width:max-content;max-width:60%;text-align:center;
-  font-size:1.35em;line-height:1.05;opacity:0;transition:opacity .3s;text-shadow:0 0 4px #000,0 .08em 0 #000;padding:.15em .5em;background:rgba(5,4,3,.45)}
+#sub{position:absolute;left:50%;transform:translateX(-50%);bottom:12%;width:max-content;max-width:72%;text-align:center;
+  font-size:1.45em;line-height:1.1;opacity:0;transition:opacity .3s;text-shadow:0 .08em 0 #000;padding:.25em .7em;background:rgba(5,4,3,.78);border-radius:.15em}
 #sub small{display:block;font-size:.65em;letter-spacing:.18em;opacity:.9}
-#sub.arjun{color:var(--arjun);font-style:italic}
+#sub.arjun{color:#e6dcc3;font-style:italic}
 #sub.meera{color:var(--meera)}#sub.tara{color:var(--tara)}
 #sub.radio{color:var(--radio)}
-#prompt{position:absolute;left:50%;transform:translateX(-50%);top:60%;font-size:1.25em;color:var(--ink);text-shadow:0 0 4px #000;opacity:0;transition:opacity .2s;white-space:nowrap}
+#prompt{position:absolute;left:50%;transform:translateX(-50%);top:60%;font-size:1.3em;color:#fff2d0;background:rgba(5,4,3,.7);padding:.1em .5em;text-shadow:0 .08em 0 #000;opacity:0;transition:opacity .2s;white-space:nowrap}
 #prompt.on{opacity:1}
 #acts{position:absolute;right:1.2em;bottom:1em;display:flex;flex-direction:column-reverse;gap:.5em;align-items:center;pointer-events:none}
-.ab{pointer-events:auto;font:inherit;font-size:.8em;color:var(--ink);background:rgba(8,6,4,.62);border:.18em solid #6b5a3e;border-radius:50%;
+.ab{pointer-events:auto;font:inherit;font-size:.8em;color:var(--ink);background:rgba(8,6,4,.8);border:.18em solid #a88c5c;border-radius:50%;
   width:5.2em;height:5.2em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.05em;cursor:pointer;touch-action:manipulation;padding:0}
-.ab svg{width:2.1em;height:2.1em;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ab svg{width:2.2em;height:2.2em;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .ab span{font-size:.95em;line-height:1}
 .ab.main{border-color:var(--rust);box-shadow:0 0 .9em rgba(194,81,47,.6);width:6.2em;height:6.2em;font-size:.9em}
 .ab.k-talk.main{border-color:#e0b27a;box-shadow:0 0 .9em rgba(224,178,122,.6)}
 .ab.k-listen.main{border-color:var(--radio);box-shadow:0 0 .9em rgba(159,208,138,.55)}
 .ab.off{opacity:.35;filter:grayscale(1)}
-#joy{position:absolute;left:7%;top:76%;width:6em;height:6em;margin:-3em 0 0 -3em;border:.14em solid rgba(234,223,195,.4);border-radius:50%;opacity:.55;pointer-events:none}
+#joy{position:absolute;left:7%;top:76%;width:6em;height:6em;margin:-3em 0 0 -3em;border:.16em solid rgba(234,223,195,.7);background:rgba(8,6,4,.25);border-radius:50%;opacity:.75;pointer-events:none}
 #joy.act{opacity:1}
-#knob{position:absolute;left:1.7em;top:1.7em;width:2.6em;height:2.6em;border-radius:50%;background:rgba(234,223,195,.4)}
+#knob{position:absolute;left:1.7em;top:1.7em;width:2.6em;height:2.6em;border-radius:50%;background:rgba(234,223,195,.65)}
 #chap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2em;pointer-events:none;opacity:0;transition:opacity 1.2s;text-align:center}
 #chap.on{opacity:1}
 #chap h2{margin:0;font-weight:400;font-size:3em;letter-spacing:.12em;text-shadow:0 0 .4em #000}
@@ -134,8 +134,8 @@ function lerp(a,b,t){return a+(b-a)*t;}
 const scene=new THREE.Scene();
 const world=new THREE.Group();scene.add(world);
 const camera=new THREE.PerspectiveCamera(62,16/9,0.08,900);camera.rotation.order='YXZ';scene.add(camera);
-scene.fog=new THREE.FogExp2(0x1b140e,0.032);scene.background=new THREE.Color(0x1b140e);
-const amb=new THREE.AmbientLight(0xcdb48c,0.6);scene.add(amb);
+scene.fog=new THREE.FogExp2(0x1b140e,0.026);scene.background=new THREE.Color(0x1b140e);
+const amb=new THREE.AmbientLight(0xcdb48c,0.72);scene.add(amb);
 const sun=new THREE.DirectionalLight(0xffd7a0,0.4);sun.position.set(-3,8,4);scene.add(sun);
 const lamp=new THREE.PointLight(0xffc27a,0.9,13);lamp.position.set(1.5,2.6,0);scene.add(lamp);
 const torch=new THREE.PointLight(0xffe6b8,0.5,11);camera.add(torch);
@@ -166,11 +166,11 @@ void main(){
   c=mix(c,vec3(l*1.3,l*0.35,l*0.25),red);
   vec2 px=floor(vUv*res);
   float d=b4(px)-0.47;
-  c*=1.08;
-  c=floor(c*7.0+0.5+d*0.95)/7.0;
-  c+=(h(px+time*60.0)-0.5)*(0.05+0.1*stress);
+  c*=1.16;
+  c=floor(c*14.0+0.5+d*0.55)/14.0;
+  c+=(h(px+time*60.0)-0.5)*(0.03+0.1*stress);
   float v=distance(vUv,vec2(0.5));
-  c*=1.0-smoothstep(0.35,0.85,v)*(0.55+0.4*stress);
+  c*=1.0-smoothstep(0.4,0.9,v)*(0.42+0.4*stress);
   float e=abs(vUv.y-0.5)*2.0;
   c*=1.0-smoothstep(lid-0.08,lid,e);
   c*=fade;
@@ -184,7 +184,7 @@ function resize(){
   const r=frameEl.getBoundingClientRect();
   const W=Math.max(2,Math.round(r.width)),H=Math.max(2,Math.round(r.height));
   frameEl.style.setProperty('--fw',W+'px');
-  const pix=Math.max(2,Math.round(W/420));
+  const pix=Math.max(1,W/560);
   const rw=Math.ceil(W/pix),rh=Math.ceil(H/pix);
   renderer.setSize(W,H,false);
   if(rt)rt.dispose();
@@ -935,11 +935,11 @@ function goal(){
 
 /* ================= chapter control ================= */
 const ENV={
-  in:{col:new THREE.Color(0x1b140e),d:0.032,amb:0.62},
-  town:{col:new THREE.Color(0x8f7b58),d:0.024,amb:0.8},
-  forest:{col:new THREE.Color(0x5f4a30),d:0.045,amb:0.62}
+  in:{col:new THREE.Color(0x1b140e),d:0.026,amb:0.74},
+  town:{col:new THREE.Color(0x8f7b58),d:0.017,amb:0.92},
+  forest:{col:new THREE.Color(0x5f4a30),d:0.034,amb:0.74}
 };
-const cur={col:new THREE.Color(0x1b140e),d:0.032,amb:0.62};
+const cur={col:new THREE.Color(0x1b140e),d:0.026,amb:0.74};
 function setChapter(n){
   G.ch=n;
   if(n===2){
