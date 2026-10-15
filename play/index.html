@@ -29,6 +29,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--hud);overf
 #tr{position:absolute;top:.6em;right:.8em;display:flex;gap:.5em;align-items:center}
 #notesBtn{pointer-events:auto;font:inherit;font-size:1.05em;color:#fff2d0;background:rgba(8,6,4,.8);border:.12em solid var(--dim);padding:.15em .5em;cursor:pointer;min-height:2em}
 button:focus-visible{outline:3px solid var(--geiger);outline-offset:2px}
+#dot{position:absolute;left:50%;top:50%;width:.34em;height:.34em;margin:-.17em 0 0 -.17em;border-radius:50%;background:rgba(255,244,214,.92);box-shadow:0 0 0 .07em rgba(0,0,0,.65);transition:transform .15s,background .15s;pointer-events:none}
+#dot.hot{transform:scale(1.7);background:#e8a96a}
 #gz{display:flex;gap:.15em;align-items:flex-end;height:1.3em}
 #gz i{display:block;width:.28em;background:#3a3a28;height:.35em}
 #gz i:nth-child(2){height:.55em}#gz i:nth-child(3){height:.75em}#gz i:nth-child(4){height:.95em}#gz i:nth-child(5){height:1.25em}
@@ -87,6 +89,7 @@ button:focus-visible{outline:3px solid var(--geiger);outline-offset:2px}
  <div id="frame">
   <canvas id="gl"></canvas>
   <div id="hud">
+    <div id="dot"></div>
     <div id="obj"></div>
     <div id="compass"><svg id="cmp" viewBox="0 0 24 24"><path d="M12 2l7 19-7-5-7 5z"/></svg><span id="cmpd"></span></div>
     <div id="tr"><div id="gz" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div id="gdot"></div><button id="notesBtn" type="button">NOTES <span id="nc">0</span></button></div>
@@ -134,7 +137,7 @@ function lerp(a,b,t){return a+(b-a)*t;}
 const scene=new THREE.Scene();
 const world=new THREE.Group();scene.add(world);
 const camera=new THREE.PerspectiveCamera(62,16/9,0.08,900);camera.rotation.order='YXZ';scene.add(camera);
-scene.fog=new THREE.FogExp2(0x1b140e,0.026);scene.background=new THREE.Color(0x1b140e);
+scene.fog=new THREE.FogExp2(0x1b140e,0.03);scene.background=new THREE.Color(0x1b140e);
 const amb=new THREE.AmbientLight(0xcdb48c,0.5);scene.add(amb);
 const hemi=new THREE.HemisphereLight(0xcfc3a8,0x3a2c1e,0.45);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffd7a0,0.5);sun.position.set(-3,8,4);scene.add(sun);
@@ -166,9 +169,10 @@ void main(){
   c=mix(c,vec3(l)*vec3(1.12,1.0,0.82),0.3);
   c=mix(c,vec3(l*1.3,l*0.35,l*0.25),red);
   vec2 px=floor(vUv*res);
+  float d=b4(px)-0.47;
   c*=1.12;
-  c=pow(max(c,vec3(0.0)),vec3(0.94));
-  c+=(h(px+time*60.0)-0.5)*(0.016+0.08*stress);
+  c=floor(c*10.0+0.5+d*0.7)/10.0;
+  c+=(h(px+time*60.0)-0.5)*(0.03+0.1*stress);
   float v=distance(vUv,vec2(0.5));
   c*=1.0-smoothstep(0.4,0.9,v)*(0.42+0.4*stress);
   float e=abs(vUv.y-0.5)*2.0;
@@ -184,12 +188,10 @@ function resize(){
   const r=frameEl.getBoundingClientRect();
   const W=Math.max(2,Math.round(r.width)),H=Math.max(2,Math.round(r.height));
   frameEl.style.setProperty('--fw',W+'px');
-  const sc=Math.min(1.25,window.devicePixelRatio||1,1100/W);
-  const rw=Math.max(2,Math.round(W*sc)),rh=Math.max(2,Math.round(H*sc));
+  const rw=Math.min(W,640),rh=Math.max(2,Math.round(rw*H/W));
   renderer.setSize(W,H,false);
   if(rt)rt.dispose();
-  const ro={minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:true};
-  try{rt=(renderer.capabilities.isWebGL2&&THREE.WebGLMultisampleRenderTarget)?new THREE.WebGLMultisampleRenderTarget(rw,rh,ro):new THREE.WebGLRenderTarget(rw,rh,ro);if(rt.samples!==undefined)rt.samples=4;}catch(e){rt=new THREE.WebGLRenderTarget(rw,rh,ro);}
+  rt=new THREE.WebGLRenderTarget(rw,rh,{minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter,depthBuffer:true});
   post.uniforms.tex.value=rt.texture;post.uniforms.res.value.set(rw,rh);
   camera.aspect=W/H;camera.updateProjectionMatrix();
   $('rot').hidden=!(window.innerHeight>window.innerWidth);
@@ -826,7 +828,12 @@ const notes=[];const NOTE_TOTAL=11;
 
 const dlg={q:[],cur:null,t:0,gap:0};
 const WHO={arjun:'ARJUN',meera:'MEERA',tara:'TARA',radio:'RADIO'};
-function say(txt,who,ms){dlg.q.push({txt:txt,who:who||'arjun',ms:ms||Math.max(2400,txt.length*70)});}
+const lastSaid={};
+function say(txt,who,ms){
+  const now=Date.now();
+  if(lastSaid[txt]&&now-lastSaid[txt]<15000)return;
+  if(dlg.q.some(x=>x.txt===txt)||(dlg.cur&&dlg.cur.txt===txt))return;
+  lastSaid[txt]=now;dlg.q.push({txt:txt,who:who||'arjun',ms:ms||Math.max(2400,txt.length*70)});}
 function seq(list){list.forEach(a=>say(a[2],a[1],a[3]));}
 function dlgBusy(){return !!dlg.cur||dlg.q.length>0;}
 const VOICE={
@@ -999,11 +1006,11 @@ function goal(){
 
 /* ================= chapter control ================= */
 const ENV={
-  in:{col:new THREE.Color(0x1b140e),d:0.026,amb:0.74},
-  town:{col:new THREE.Color(0x8f7b58),d:0.017,amb:0.92},
-  forest:{col:new THREE.Color(0x5f4a30),d:0.034,amb:0.74}
+  in:{col:new THREE.Color(0x1b140e),d:0.03,amb:0.62},
+  town:{col:new THREE.Color(0x8f7b58),d:0.021,amb:0.8},
+  forest:{col:new THREE.Color(0x5f4a30),d:0.04,amb:0.66}
 };
-const cur={col:new THREE.Color(0x1b140e),d:0.026,amb:0.74};
+const cur={col:new THREE.Color(0x1b140e),d:0.03,amb:0.62};
 function setChapter(n){
   G.ch=n;
   if(n===2){
@@ -1067,18 +1074,19 @@ $('notesBtn').addEventListener('click',()=>{
 $('card').addEventListener('click',closeCard);
 
 function pickTargets(){
-  const list=[],fx=-Math.sin(yaw),fz=-Math.cos(yaw);
+  /* only what the crosshair dot is pointing at, and only one option at a time */
+  let best=null,bs=-9;const fx=-Math.sin(yaw),fz=-Math.cos(yaw);
   for(const it of inter){
     if(it.ch!==G.ch)continue;
     if(it.show&&!it.show())continue;
     const dx=it.pos.x-P.x,dz=it.pos.z-P.z,d=Math.hypot(dx,dz);
     if(d>it.r)continue;
     const dot=(dx*fx+dz*fz)/(d||1);
-    if(dot<0.15&&d>1.0)continue;
-    list.push({it:it,sc:dot*2-d/it.r});
+    if(dot<(d<1.3?0.4:0.9))continue;
+    const sc=dot*2-d/it.r;
+    if(sc>bs){bs=sc;best=it;}
   }
-  list.sort((a,b)=>b.sc-a.sc);
-  targets=list.slice(0,3).map(a=>a.it);
+  targets=best?[best]:[];
 }
 function renderActs(show){
   const list=show?targets:[];
@@ -1094,7 +1102,7 @@ function renderActs(show){
   }
   const busy=dlgBusy();
   for(let i=0;i<box.children.length;i++){const t=list[i];box.children[i].classList.toggle('off',!!(busy&&t&&!t.silent));}
-  const pr=$('prompt');
+  const pr=$('prompt');$('dot').classList.toggle('hot',list.length>0);
   if(list.length){pr.textContent=list[0].label;pr.classList.add('on');}else pr.classList.remove('on');
 }
 function doInteract(it){
