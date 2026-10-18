@@ -12,14 +12,11 @@
 }
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--hud);overflow:hidden;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 #wrap{position:fixed;inset:0;background:#000;touch-action:none}
-#frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:min(calc(100vw - 32px),calc(100vh * 1.7778));width:min(calc(100vw - 32px),calc(100dvh * 1.7778));
-  aspect-ratio:16/9;font-size:calc(var(--fw,800px) / 40);background:#0b0806;overflow:hidden}
+#frame{position:absolute;inset:0;font-size:calc(var(--fw,800px) / 40);background:#0b0806;overflow:hidden}
 #gl{display:block;width:100%;height:100%;image-rendering:pixelated}
-#hud{position:absolute;inset:0;pointer-events:none}
+#hud{position:absolute;inset:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);pointer-events:none}
 #obj{position:absolute;top:.6em;left:.8em;max-width:42%;font-size:1em;line-height:1.15;white-space:pre-line;color:#fff2d0;
   background:rgba(8,6,4,.6);padding:.25em .6em;text-shadow:0 .08em 0 #000;border-left:.15em solid var(--rust);opacity:0;transition:opacity .6s}
 #obj.on{opacity:1}
@@ -53,6 +50,18 @@ button:focus-visible{outline:3px solid var(--geiger);outline-offset:2px}
 .ab.k-talk.main{border-color:#e0b27a;box-shadow:0 0 .9em rgba(224,178,122,.6)}
 .ab.k-listen.main{border-color:var(--radio);box-shadow:0 0 .9em rgba(159,208,138,.55)}
 .ab.off{opacity:.35;filter:grayscale(1)}
+.ab.k-drink.main{border-color:#d7a05a;box-shadow:0 0 .9em rgba(215,160,90,.6)}
+#anim{position:absolute;left:50%;bottom:-3em;width:15em;height:15em;margin-left:-7.5em;opacity:0;pointer-events:none}
+#anim.on{opacity:1}
+#anim svg{width:100%;height:100%;overflow:visible;stroke:#eadfc3;fill:rgba(8,6,4,.78);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 .2em .3em #000)}
+#anim.a-drink svg{animation:aDrink var(--ms) ease-in-out forwards}
+#anim.a-take svg{animation:aTake var(--ms) ease-in-out forwards}
+#anim.a-open svg{animation:aOpen var(--ms) ease-in-out forwards}
+#anim.a-listen svg{animation:aListen var(--ms) ease-in-out forwards}
+@keyframes aDrink{0%{transform:translate(35%,75%) rotate(10deg)}22%{transform:translate(6%,18%) rotate(0)}48%{transform:translate(0,-8%) rotate(-40deg)}72%{transform:translate(0,-8%) rotate(-44deg)}100%{transform:translate(35%,85%) rotate(10deg)}}
+@keyframes aTake{0%{transform:translate(25%,85%) scale(.85)}40%{transform:translate(0,12%) scale(1)}62%{transform:translate(0,12%) scale(.86)}100%{transform:translate(12%,90%) scale(.85)}}
+@keyframes aOpen{0%{transform:translate(0,90%)}35%{transform:translate(0,22%)}70%{transform:translate(22%,22%) rotate(14deg)}100%{transform:translate(0,90%)}}
+@keyframes aListen{0%{transform:translate(0,40%) scale(.6);opacity:0}25%{opacity:1}50%{transform:translate(0,30%) scale(1)}75%{opacity:1}100%{transform:translate(0,40%) scale(.7);opacity:0}}
 #joy{position:absolute;left:13%;top:74%;width:6em;height:6em;margin:-3em 0 0 -3em;border:.16em solid rgba(234,223,195,.7);background:rgba(8,6,4,.25);border-radius:50%;opacity:.75;pointer-events:none}
 #joy.act{opacity:1}
 #knob{position:absolute;left:1.7em;top:1.7em;width:2.6em;height:2.6em;border-radius:50%;background:rgba(234,223,195,.65)}
@@ -95,6 +104,7 @@ button:focus-visible{outline:3px solid var(--geiger);outline-offset:2px}
     <div id="tr"><div id="gz" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div id="gdot"></div><button id="notesBtn" type="button">NOTES <span id="nc">0</span></button></div>
     <div id="sub"><small id="who"></small><span id="line"></span></div>
     <div id="prompt"></div>
+    <div id="anim"></div>
     <div id="acts"></div>
     <div id="joy"><div id="knob"></div></div>
   </div>
@@ -147,11 +157,11 @@ const torch=new THREE.PointLight(0xffe6b8,0.5,11);camera.add(torch);
 const postScene=new THREE.Scene();
 const postCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 const post=new THREE.ShaderMaterial({
-  uniforms:{tex:{value:null},res:{value:new THREE.Vector2(1,1)},time:{value:0},stress:{value:0},fade:{value:0},lid:{value:0},red:{value:0}},
+  uniforms:{tex:{value:null},res:{value:new THREE.Vector2(1,1)},time:{value:0},stress:{value:0},fade:{value:0},lid:{value:0},red:{value:0},dark:{value:0}},
   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',
   fragmentShader:`
 precision highp float;
-uniform sampler2D tex;uniform vec2 res;uniform float time,stress,fade,lid,red;
+uniform sampler2D tex;uniform vec2 res;uniform float time,stress,fade,lid,red,dark;
 varying vec2 vUv;
 float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
 float b2(vec2 a){a=floor(a);return fract(a.x/2.0+a.y*a.y*0.75);}
@@ -177,7 +187,7 @@ void main(){
   c*=1.0-smoothstep(0.4,0.9,v)*(0.42+0.4*stress);
   float e=abs(vUv.y-0.5)*2.0;
   c*=1.0-smoothstep(lid-0.08,lid,e);
-  c*=fade;
+  c*=fade*(1.0-dark);
   gl_FragColor=vec4(max(c,0.0),1.0);
 }`,
   depthTest:false,depthWrite:false});
@@ -187,7 +197,7 @@ const frameEl=$('frame');
 function resize(){
   const r=frameEl.getBoundingClientRect();
   const W=Math.max(2,Math.round(r.width)),H=Math.max(2,Math.round(r.height));
-  frameEl.style.setProperty('--fw',W+'px');
+  frameEl.style.setProperty('--fw',Math.min(W,H*16/9)+'px');
   const rw=Math.min(W,640),rh=Math.max(2,Math.round(rw*H/W));
   renderer.setSize(W,H,false);
   if(rt)rt.dispose();
@@ -364,8 +374,10 @@ plane(1.0,1.1,null,5.99,1.8,-1.5,-Math.PI/2,0xbfae80);plane(1.0,1.1,null,5.99,1.
 mHide.push(box(0.2,3.6,4.2,-2,1.2,-2.9,wallC,{col:true}));
 mHide.push(box(0.2,3.6,4.2,-2,1.2,2.9,wallC,{col:true}));
 mHide.push(box(0.2,0.6,1.6,-2,2.7,0,wallC));
-const bedDoor=box(0.12,2.4,1.6,-1.93,1.2,0,0x4a301d,{col:true});mHide.push(bedDoor);
-mHide.push(box(0.1,0.1,0.1,-1.85,1.1,0.55,0x9a8a60));
+const rdG=new THREE.Group();rdG.position.set(-1.93,0,-0.8);world.add(rdG);
+const bedDoor=box(0.12,2.4,1.6,0,1.2,0.8,0x4a301d,{parent:rdG});mHide.push(bedDoor);
+mHide.push(box(0.1,0.1,0.1,0.09,1.1,1.35,0x9a8a60,{parent:rdG}));box(0.1,0.1,0.1,-0.09,1.1,1.35,0x9a8a60,{parent:rdG});
+const rdCol=addAA(-2.05,-1.8,-0.8,0.8);
 box(1.9,0.45,1.1,-0.6,0.225,-3.9,0x5a4030,{col:true});
 box(1.9,0.2,1.0,-0.6,0.55,-3.9,0x8a7f66);
 box(0.5,0.12,0.7,-1.3,0.7,-3.9,0xb8ae92);
@@ -374,13 +386,33 @@ box(0.45,0.5,0.45,2.4,0.25,-1.2,0x4a3320);box(0.45,0.5,0.45,4.8,0.25,-1.2,0x4a33
 const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.055,0.1,6),lm(0xd8d0bc));cup.position.set(3.6,0.85,-1.2);world.add(cup);
 box(3.2,1,0.8,4.4,0.5,-4.5,0x5a4331,{col:true});
 box(3,0.06,0.3,4.4,1.9,-4.85,0x4a3622);
-box(2.0,2.0,0.4,-4,1,-4.7,0x3a2a1c);
+box(2.0,2.0,0.4,-4,1,-4.7,0x3a2a1c,{col:true});
 box(3.6,0.03,2.4,1,0.015,0.7,0x7a2f25);
 plane(1.6,1.0,null,1.5,1.9,-4.98,0,0xbfae80);
 addAA(3.95,4.45,-3.75,-3.25);
 const hatch=box(1.2,0.05,1.2,4.4,0.025,2.6,0x3a2a1c);
 box(0.3,0.04,0.05,4.4,0.07,2.6,0x9a8a60);
 
+/* ---- Arjun's room (west of the partition) ---- */
+(function arjunRoom(){
+  box(2.6,0.03,2.0,-4.1,0.015,0.9,0x5a3328);                                  // rug
+  box(1.1,0.35,2.1,-5.35,0.18,3.9,0x4a3322,{col:true});                       // bed frame
+  box(1.0,0.2,2.0,-5.35,0.45,3.9,0x8a7f66);                                   // mattress
+  box(0.7,0.12,0.4,-5.35,0.62,4.7,0xc8bea4);                                  // pillow
+  box(1.02,0.1,1.2,-5.35,0.58,3.4,0x6a2a2e);                                  // blanket
+  box(0.8,0.04,1.9,-5.7,0.74,-1.0,0x5a4331,{col:true});                       // desk top
+  box(0.06,0.74,1.7,-5.35,0.37,-1.0,0x4a3622);box(0.06,0.74,1.7,-6.0,0.37,-1.0,0x4a3622);  // desk sides
+  box(0.5,0.05,0.5,-4.8,0.45,-1.0,0x3a2a1c);box(0.05,0.5,0.5,-4.58,0.7,-1.0,0x3a2a1c);   // chair
+  box(0.4,0.01,0.3,-5.6,0.77,-0.4,0xd9ccaa);box(0.36,0.01,0.28,-5.55,0.78,-0.36,0xc9bc9a);   // papers
+  box(0.3,0.14,0.2,-5.7,0.84,-1.5,0x4a5a42);box(0.18,0.02,0.14,-5.7,0.92,-1.5,0xa8bd6c,{basic:true}); // old geiger counter
+  const lb=box(0.14,0.04,0.14,-5.95,0.78,-1.9,0x2a2622);box(0.03,0.35,0.03,-5.95,0.97,-1.9,0x2a2622);box(0.22,0.14,0.22,-5.95,1.2,-1.9,0xd8b060,{basic:true});
+  box(0.2,0.12,0.2,-5.5,0.82,-0.1,0xd8d0bc);                                   // mug
+  box(1.0,2.0,0.3,-2.6,1.0,-4.85,0x3a2a1c,{col:true});                         // bookshelf
+  for(let r=0;r<4;r++)for(let k=0;k<7;k++)box(0.1,0.34,0.22,-2.95+k*0.11,0.4+r*0.45,-4.7,[0x6a2a2e,0x2f4a5a,0x8a7a4a,0x3a3a2a][(r+k)%4]);
+  plane(0.7,0.5,null,-4.0,1.9,-4.93,0,0x5a4a33);                                // pinned map
+  plane(0.5,0.35,null,-4.8,1.7,-4.93,0,0xbfae80);
+})();
+const deskLamp=new THREE.PointLight(0xffc27a,0,8);deskLamp.position.set(-5.5,1.6,-1.5);scene.add(deskLamp);
 const calTex=ctex(96,120,(g,w,h)=>{g.fillStyle='#d9ccaa';g.fillRect(0,0,w,h);g.fillStyle='#8f2a1c';g.fillRect(0,0,w,22);
   g.fillStyle='#e8dcc0';g.font='bold 14px "Courier New",monospace';g.textAlign='center';g.fillText('MARCH',w/2,16);
   g.fillStyle='#4a3d2a';g.font='11px "Courier New",monospace';
@@ -474,6 +506,7 @@ function faceTex(kind,burnt){
 }
 function person(o){
   const kind=o.kind,s=o.h/1.6,hs=kind==='g'?1.22:1,g=new THREE.Group();
+  const lm=c=>new THREE.MeshLambertMaterial({color:c});
   const sk=lm(o.skin),hairM=lm(o.hair||(kind==='m'?0x1a120d:0x100a07));
   const up=new THREE.Group();g.add(up);
   if(o.sit)up.position.y=-0.68*s;
@@ -564,12 +597,14 @@ function person(o){
   g.userData={head,face,faceM,burntM,legs,arms};
   return g;
 }
+function setAlpha(p,a){p.traverse(o=>{if(o.material){o.material.transparent=true;o.material.opacity=a;}});}
 function setBurn(p,on){p.userData.face.material=on?p.userData.burntM:p.userData.faceM;}
 const meera=person({kind:'f',h:1.62,skin:0xbb8d6c});meera.position.set(4.2,0,-3.4);world.add(meera);
 const taraSit=person({kind:'g',h:1.0,skin:0xbb8d6c,sit:true});taraSit.position.set(1.2,0,0.7);world.add(taraSit);
 const taraStand=person({kind:'g',h:1.0,skin:0xbb8d6c});taraStand.visible=false;world.add(taraStand);
 const meera2=person({kind:'f',h:1.62,skin:0xbb8d6c});meera2.visible=false;world.add(meera2);
 const meera3=person({kind:'f',h:1.62,skin:0xbb8d6c});meera3.visible=false;setBurn(meera3,true);world.add(meera3);
+const scareF=person({kind:'f',h:1.62,skin:0xbb8d6c});scareF.visible=false;setBurn(scareF,true);world.add(scareF);
 const arjunAv=person({kind:'m',h:1.76,skin:0xa67b5b});arjunAv.visible=false;world.add(arjunAv);
 
 /* ================= buildings, vehicles, scenery ================= */
@@ -626,7 +661,7 @@ function building(o){
     }else if(k==='tapri'){
       gbox(g,w-0.4,1.0,0.8,0,0.5,d/2-0.2,0x4a3622);gbox(g,0.3,0.4,0.3,-0.8,1.2,d/2-0.2,0x8a8478);gbox(g,0.2,0.3,0.2,0.2,1.15,d/2-0.2,0xb8ae92);
     }
-    if(o.sign){const sw=Math.min(w-0.4,3.2);plane(sw,0.7,signTex(o.sign,'#3a2c1f','#d8c9a0'),0,h-0.35+(k==='tapri'?0.4:0),d/2+0.07,0,null,g);}
+    if(o.sign){const sw=Math.min(w-0.4,3.2);plane(sw,0.7,signTex(o.sign,'#3a2c1f','#d8c9a0'),0,h-(k==='tapri'?0.55:0.35),d/2+0.07,0,null,g);}
   }
   return g;
 }
@@ -653,21 +688,48 @@ function car(z,off,extra,col){
 function bus(z,off,extra){
   const x=rc(z)+off,yaw=roadAng(z)+extra,g=new THREE.Group();
   g.rotation.order='YXZ';g.position.set(x,baseY(z),z);g.rotation.set(-slopeY(z),yaw,0);world.add(g);
+  const Y=0xe0a82a,K=0x15110c,GL=0x1a2226;
   const prof=new THREE.Shape();
-  [[-4.2,0.55],[-4.2,3.1],[3.7,3.1],[4.15,2.7],[4.15,0.85],[3.7,0.55]].forEach((p,i)=>{if(i)prof.lineTo(p[0],p[1]);else prof.moveTo(p[0],p[1]);});
-  const geo=new THREE.ExtrudeGeometry(prof,{depth:2.5,bevelEnabled:false});geo.translate(0,0,-1.25);
-  const body=new THREE.Mesh(geo,lm(0xb8932a));body.rotation.y=-Math.PI/2;g.add(body);
+  [[-4.2,0.5],[-4.2,2.95],[-4.05,3.12],[2.1,3.12],[2.5,2.2],[4.0,2.0],[4.2,1.8],[4.2,0.7],[3.9,0.5]].forEach((a,i)=>{if(i)prof.lineTo(a[0],a[1]);else prof.moveTo(a[0],a[1]);});
+  const geo=new THREE.ExtrudeGeometry(prof,{depth:2.4,bevelEnabled:true,bevelThickness:0.07,bevelSize:0.07,bevelSegments:2});geo.translate(0,0,-1.2);
+  const body=new THREE.Mesh(geo,lm(Y));body.rotation.y=-Math.PI/2;g.add(body);
   [-1,1].forEach(k=>{
-    gbox(g,0.03,0.32,8.0,k*1.26,1.15,-0.1,0x15110c);
-    gbox(g,0.03,0.95,7.0,k*1.26,2.15,-0.3,0x161b1d,true);
-    for(let i=0;i<8;i++)gbox(g,0.04,0.95,0.08,k*1.265,2.15,-3.7+i*0.95,0xb8932a);
-    gbox(g,0.03,0.3,7.6,k*1.26,2.85,-0.2,0x15110c);
+    const sx=k*1.285;
+    gbox(g,0.03,0.28,8.2,sx,0.72,-0.05,K);
+    gbox(g,0.03,0.07,8.2,sx,1.55,-0.05,K);gbox(g,0.03,0.07,8.2,sx,1.95,-0.05,K);
+    for(let i=0;i<5;i++){const zc=-3.5+i*0.95;gbox(g,0.03,0.84,0.8,sx,2.5,zc,GL,true);gbox(g,0.035,0.06,0.82,sx*1.001,2.94,zc,K);gbox(g,0.035,0.06,0.82,sx*1.001,2.06,zc,K);}
+    if(k<0){gbox(g,0.03,0.84,0.8,sx,2.5,1.2,GL,true);gbox(g,0.03,0.84,0.8,sx,2.5,0.25,GL,true);}
+    // mirrors
+    gbox(g,0.3,0.05,0.05,k*1.45,2.2,2.5,K);gbox(g,0.05,0.42,0.2,k*1.6,2.2,2.5,K);
   });
-  gbox(g,2.2,1.0,0.03,0,2.15,4.12,0x161b1d,true);gbox(g,2.5,0.3,0.12,0,0.62,4.2,0x2a2622);gbox(g,2.5,0.3,0.12,0,0.62,-4.22,0x2a2622);
-  gbox(g,0.03,1.9,0.95,1.27,1.5,2.9,0x0c0a08,true);
-  [-0.8,0.8].forEach(px=>{gbox(g,0.3,0.2,0.05,px,1.0,4.16,0xd8c890,true);gbox(g,0.3,0.2,0.05,px,1.0,-4.2,0x802018,true);});
-  [[-1.2,2.7],[1.2,2.7],[-1.2,-2.4],[1.2,-2.4]].forEach(a=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(0.52,0.52,0.3,12),lm(0x0e0c0a));w.rotation.z=Math.PI/2;w.position.set(a[0],0.52,a[1]);g.add(w);});
-  const st=signTex('SCHOOL BUS','#b8932a','#15110c');plane(3.6,0.28,st,1.275,3.0,-0.2,Math.PI/2,null,g);plane(3.6,0.28,st,-1.275,3.0,-0.2,-Math.PI/2,null,g);
+  // folding door, right side
+  gbox(g,0.03,2.15,1.05,1.287,1.65,1.45,0x0c0a08,true);
+  gbox(g,0.035,0.8,0.42,1.29,2.45,1.22,GL,true);gbox(g,0.035,0.8,0.42,1.29,2.45,1.68,GL,true);
+  // stop sign arm on the driver side
+  const ss=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.04,8),bm(0xb02a20));ss.rotation.z=Math.PI/2;ss.position.set(-1.5,1.75,0.55);g.add(ss);
+  gbox(g,0.22,0.05,0.05,-1.38,1.75,0.55,K);
+  // windshield, slanted
+  const ws=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.0,0.04),bm(GL));ws.rotation.x=-0.437;ws.position.set(0,2.66,2.33);g.add(ws);
+  gbox(g,2.3,0.12,0.2,0,3.1,2.12,K);
+  // front: grille, lights, bumper
+  gbox(g,1.5,0.7,0.05,0,1.25,4.27,K);
+  [-0.82,0.82].forEach(px=>{gbox(g,0.3,0.28,0.07,px,1.4,4.26,0xf2e6b0,true);gbox(g,0.14,0.14,0.07,px,0.98,4.26,0xe58a1a,true);});
+  gbox(g,2.6,0.28,0.28,0,0.62,4.25,0x2a2622);
+  // rear: window, door seam, lights, bumper
+  gbox(g,1.8,0.8,0.04,0,2.55,-4.31,GL,true);gbox(g,0.05,2.1,0.05,0,1.6,-4.3,K);
+  [-1,1].forEach(k=>{gbox(g,0.26,0.2,0.06,k*1.0,1.35,-4.3,0x9a2018,true);gbox(g,0.18,0.12,0.06,k*1.0,2.98,-4.3,0xe58a1a,true);});
+  gbox(g,2.6,0.28,0.28,0,0.62,-4.26,0x2a2622);
+  // roof
+  gbox(g,0.8,0.12,1.0,0,3.2,-1.0,0x9a9a8a);gbox(g,0.8,0.12,1.0,0,3.2,-2.6,0x9a9a8a);
+  [-0.9,0.9].forEach(px=>{gbox(g,0.28,0.12,0.14,px,3.2,2.0,0xe58a1a,true);gbox(g,0.28,0.12,0.14,px,3.2,-4.0,0xb02a20,true);});
+  // wheels
+  [[-1.15,2.9],[1.15,2.9],[-1.15,-2.3],[1.15,-2.3]].forEach(a=>{
+    const w=new THREE.Mesh(new THREE.CylinderGeometry(0.52,0.52,0.34,18),lm(0x0e0c0a));w.rotation.z=Math.PI/2;w.position.set(a[0],0.52,a[1]);g.add(w);
+    const h=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.37,12),lm(0x8a8a82));h.rotation.z=Math.PI/2;h.position.set(a[0],0.52,a[1]);g.add(h);
+    gbox(g,0.08,0.08,1.25,a[0]*1.12,1.08,a[1],K);
+  });
+  const st=signTex('SCHOOL BUS','#e0a82a','#15110c',512);
+  plane(2.4,0.3,st,1.298,1.75,-1.9,Math.PI/2,null,g);plane(2.4,0.3,st,-1.298,1.75,-1.9,-Math.PI/2,null,g);
   addCol(x,z,1.3,4.3,yaw);
   return g;
 }
@@ -701,6 +763,7 @@ const board=decor(14,1,4.7);
 box(0.12,2.0,0.12,-0.85,1.0,0,0x2a1d14,{parent:board});box(0.12,2.0,0.12,0.85,1.0,0,0x2a1d14,{parent:board});
 box(1.8,0.08,0.08,0,1.95,0.02,0x2a1d14,{parent:board});box(1.7,0.08,0.08,0,0.78,0.02,0x2a1d14,{parent:board});
 const noticeTex=paperTex(['ZILA PRASHASAN','','Sabhi nivasi turant','kshetra khaali karein.','','ALL RESIDENTS MUST','EVACUATE IMMEDIATELY'],170,150,'AADESH');
+box(1.56,1.26,0.05,0,1.36,0.02,0x3a2a1c,{parent:board});
 plane(1.5,1.2,noticeTex,0,1.36,0.06,0,null,board);
 for(let k=0;k<26;k++){const m=new THREE.Mesh(new THREE.PlaneGeometry(0.3,0.22),new THREE.MeshBasicMaterial({color:0xcfc6aa}));
   const z=8+Math.random()*54;m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*3;m.position.set(rc(z)+(Math.random()-0.5)*6,baseY(z)+0.04,z);world.add(m);}
@@ -825,9 +888,9 @@ function sting(){
 const G={started:false,paused:false,ended:false,t:0,ch:1,stress:0,stressT:0.04,spike:0,red:0,burnT:0,geigerBoost:0,
   tasks:{chai:0,drawing:0,calendar:0},doorOpen:false,meeraTalks:0,meeraHello:false,taraTalks:0,bedTalks:0,
   notice:0,radio:0,barrier:false,taraFollow:false,taraVanish:false,taraAt:0,taraSeen:false,ghostDone:false,
-  mirrorAlone:0,mirrorGhost:0,mirrorN:0,dir:{x:0,z:1},opened:false};
-const P={x:0.1,z:-2.7,y:0};let yaw=-Math.PI/2,pitch=0,bobT=0,stepAcc=0;
-const notes=[];const NOTE_TOTAL=11;
+  mirrorAlone:0,mirrorGhost:0,mirrorN:0,dir:{x:0,z:1},opened:false,roomDoor:false,hatchN:0,chaiBusy:false,sc1:0,sc1t:0,sc2:0,sc2t:0,sc3:0,sc3t:0,taraFade:0,taraLine:0,animT:0,animD:1,animK:'',dark:0,darkT:0};
+const P={x:-4.4,z:1.2,y:0};let yaw=-Math.PI/2,pitch=0,bobT=0,stepAcc=0;
+const notes=[];const NOTE_TOTAL=12;
 
 const dlg={q:[],cur:null,t:0,gap:0};
 const WHO={arjun:'ARJUN',meera:'MEERA',tara:'TARA',radio:'RADIO'};
@@ -889,9 +952,27 @@ const ICON={
   look:'<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   take:'<svg viewBox="0 0 24 24"><path d="M8 12V5.5a1.5 1.5 0 013 0V11m0-5a1.5 1.5 0 013 0v5m0-4a1.5 1.5 0 013 0v6.5c0 3.5-2.5 6-6 6s-6-2.5-6-5.5l-1-3a1.4 1.4 0 012.6-.9z"/></svg>',
   open:'<svg viewBox="0 0 24 24"><path d="M6 3h11v18H6z"/><path d="M6 3l6 2v16l-6 0"/><circle cx="14" cy="12" r="1"/></svg>',
-  listen:'<svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>'
+  listen:'<svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>',
+  drink:'<svg viewBox="0 0 24 24"><path d="M5 8h12v6a5 5 0 01-5 5h-2a5 5 0 01-5-5z"/><path d="M17 10h2a2 2 0 010 4h-2"/><path d="M9 3c-1 1 1 2 0 3M13 3c-1 1 1 2 0 3"/></svg>'
 };
-const KL={talk:'Baat karo',look:'Dekho',take:'Uthao',open:'Kholo',listen:'Suno'};
+const KL={talk:'Baat karo',look:'Dekho',take:'Uthao',open:'Kholo',listen:'Suno',drink:'Piyo'};
+
+/* ================= action animations ================= */
+const ANIMSVG={
+  drink:'<svg viewBox="0 0 100 100"><path d="M22 34h44v28a20 20 0 01-20 20h-4a20 20 0 01-20-20z" fill="#e8dcc0" stroke="#2a2118" stroke-width="2.5"/><path d="M66 42h9a8 8 0 010 18h-9" fill="none" stroke="#e8dcc0" stroke-width="5"/><rect x="26" y="38" width="36" height="7" fill="#9a5f2c" stroke="none"/><path d="M34 26c-5 5 5 8 0 14M46 24c-5 5 5 8 0 14M58 26c-5 5 5 8 0 14" fill="none" stroke="#cfc6aa" stroke-width="2" opacity=".7"/><ellipse cx="30" cy="70" rx="16" ry="10" fill="#bb8d6c" stroke="#2a2118" stroke-width="2"/></svg>',
+  take:'<svg viewBox="0 0 24 24"><path d="M8 12V5.5a1.5 1.5 0 013 0V11m0-5a1.5 1.5 0 013 0v5m0-4a1.5 1.5 0 013 0v6.5c0 3.5-2.5 6-6 6s-6-2.5-6-5.5l-1-3a1.4 1.4 0 012.6-.9z" fill="#bb8d6c" stroke="#2a2118" stroke-width=".5"/></svg>',
+  open:'<svg viewBox="0 0 24 24"><path d="M8 12V5.5a1.5 1.5 0 013 0V11m0-5a1.5 1.5 0 013 0v5m0-4a1.5 1.5 0 013 0v6.5c0 3.5-2.5 6-6 6s-6-2.5-6-5.5l-1-3a1.4 1.4 0 012.6-.9z" fill="#bb8d6c" stroke="#2a2118" stroke-width=".5"/></svg>',
+  listen:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4" stroke-width="1.6"/></svg>'
+};
+function playAnim(kind,ms,cb){
+  const el=$('anim');G.animT=G.animD=ms/1000;G.animK=kind;
+  el.innerHTML=ANIMSVG[kind]||'';el.style.setProperty('--ms',ms+'ms');el.className='on a-'+kind;
+  if(kind==='drink'){[0.52,0.62,0.72].forEach(f=>setTimeout(()=>{noiseBurst(0.13,'lowpass',420,0.22);},ms*f));}
+  else if(kind==='open'){setTimeout(()=>noiseBurst(0.22,'lowpass',160,0.25),ms*0.45);}
+  else if(kind==='take'){setTimeout(()=>noiseBurst(0.06,'highpass',2500,0.16),ms*0.45);}
+  setTimeout(()=>{el.className='';el.innerHTML='';G.animT=0;if(cb&&!G.ended)cb();},ms);
+}
+function pulseDark(v,t){G.dark=v;G.darkT=t;}
 
 /* ================= interactables ================= */
 const inter=[];let iid=0;
@@ -907,10 +988,14 @@ I(0,0,'Tara se baat karo','talk',()=>{
   const L=['Papa, dekho! Maine kya banaya!','Papa… mummy ki chai thandi ho rahi hai.','Papa, aaj bahar bahut shaant hai na?'];
   say(L[G.taraTalks%3],'tara');G.taraTalks++;
 },{pos:taraSit.position,r:2.2});
-I(3.6,-1.2,'Chai uthao','take',()=>{
-  if(G.tasks.chai){say('Chai… na garam hai, na thandi.','arjun');return;}
-  G.tasks.chai=1;say('Chai… na garam hai, na thandi. Bas cup haath mein hai.','arjun');say(MEERA_LINE,'meera',3000);spike(0.25);refreshObj();
-},{});
+I(3.6,-1.2,'Chai piyo','drink',()=>{
+  if(G.tasks.chai||G.chaiBusy)return;G.chaiBusy=true;
+  playAnim('drink',3400,()=>{
+    G.tasks.chai=1;cup.visible=false;
+    say('Chai… na garam hai, na thandi. Bas cup haath mein hai.','arjun',4200);
+    spike(0.25);refreshObj();G.sc1=1;G.sc1t=0;
+  });
+},{show:()=>!G.tasks.chai&&!G.chaiBusy});
 I(1.4,1.35,'Drawing dekho','look',()=>{
   G.tasks.drawing=1;refreshObj();
   addNote('drawing','Tara ki drawing','Kaala pahaad. Laal aasman. Ek chhota sa ghar, aur ghar ke saamne hum teen.\n\nYeh pahaad toh humare gaon mein kahin nahi hai…',drawArt(0).toDataURL());
@@ -928,19 +1013,28 @@ I(-1.9,3.3,'Aaine mein dekho','look',()=>{
   else if(G.mirrorN===2){G.mirrorGhost=5;sting();spike(0.9);say('Mere peeche… Meera ka chehra… jala hua.','arjun',4000);}
   else say('Bas apni hi shakal. Thaki hui.','arjun');
 },{r:2.4});
-I(-1.9,0,'Darwaza kholo','open',()=>{
-  G.bedTalks++;
-  if(G.bedTalks===1)say('Taala band hai. Chaabi kahin nahi mil rahi.','arjun');
-  else if(G.bedTalks===2)say('Andar se halki si tik… tik… ki awaaz aa rahi hai.','arjun',3800);
+I(-2,0,'Darwaza kholo','open',()=>{
+  if(G.roomDoor)return;
+  playAnim('open',900,()=>{G.roomDoor=true;rdCol.off=true;noiseBurst(0.35,'lowpass',140,0.3);refreshObj();});
+},{show:()=>!G.roomDoor,r:2.3});
+I(4.4,2.6,'Neeche ka darwaza','open',()=>{
+  G.hatchN++;const n=G.hatchN;
+  if(n===1)say('Neeche ka darwaza. Haath lagate hi lakdi thandi lagti hai… aur taala bhi band hai.','arjun',4200);
+  else if(n===2)say('Taala band hai. Chaabi kahin nahi mil rahi.','arjun');
+  else if(n===3)say('Andar se halki si tik… tik… ki awaaz aa rahi hai.','arjun',3800);
   else say('Papa, wahan mat jao.','tara',3200);
   G.geigerBoost=3;
-},{r:2.4});
-I(4.4,2.6,'Neeche ka darwaza','open',()=>{say('Neeche ka darwaza. Haath lagate hi lakdi thandi lagti hai… aur taala bhi band hai.','arjun',4200);},{r:1.9});
+},{r:1.9});
+I(-5.3,-1.0,'Report dekho','look',()=>{
+  addNote('report','Unit 4 report','NIRMAN PLANT — UNIT 4\n\nCoolant valve 7B: reading limit se upar.\nShutdown ki sifarish maine likh di thi.\n\nSign karna baaki hai.\n\nAgar maine kal sign kar diya hota…');
+},{r:2.6,silent:true});
 I(0,4.8,'Bahar jaao','open',()=>{
   if(!(G.tasks.chai&&G.tasks.drawing&&G.tasks.calendar)){say('Abhi nahi. Ghar mein kuch adhoora lag raha hai.','arjun');return;}
   if(G.doorOpen)return;
-  G.doorOpen=true;doorCol.off=true;spike(0.5);G.burnT=0.3;sting();
-  seq([[0,'meera','Arjun… chalo yahan se chalte hain.',3400],[0,'tara','Papa, chalo na.',2400]]);refreshObj();
+  playAnim('open',900,()=>{
+    G.doorOpen=true;doorCol.off=true;spike(0.5);G.burnT=0.3;sting();
+    seq([[0,'meera','Arjun… chalo yahan se chalte hain.',3400],[0,'tara','Papa, chalo na.',2400]]);refreshObj();
+  });
 },{show:()=>!G.doorOpen,r:2.3});
 /* chapter 2 */
 const noticePos={x:rc(14)+4.5,z:14},carPos={x:rc(26)+1.7,z:26};
@@ -950,28 +1044,38 @@ I(noticePos.x,noticePos.z,'Notice padho','look',()=>{
   G.notice=1;addNote('evac','Aadesh','ZILA PRASHASAN\n\nSabhi nivasi turant kshetra khaali karein.\nAll residents must evacuate immediately.\n\nSirf zaroori saaman saath lein. Radio sunte rahein.\n\nTareekh: ........ (dhundhli)');refreshObj();
 },{ch:2,r:2.6,silent:true});
 I(carPos.x,carPos.z,'Car ka radio sunno','listen',()=>{
-  G.radio=1;refreshObj();G.geigerBoost=6;staticBurst(1500);spike(0.5);
-  say('…Emergency evacuation… radiation levels rising… Emergency evacuation…','radio',5200);
-  later(5400,()=>{if(!notes.some(n=>n.id==='car'))addNote('car','Car ka radio','"…Emergency evacuation… radiation levels rising…"\n\nBar bar wahi do line. Seat par ek bachche ka khilona pada hai.');});
-},{ch:2,r:3.0});
+  if(G.radio)return;
+  playAnim('listen',1500,()=>{
+    G.radio=1;refreshObj();G.geigerBoost=6;staticBurst(1500);spike(0.5);
+    say('…Emergency evacuation… radiation levels rising… Emergency evacuation…','radio',5200);
+    later(5400,()=>{if(!notes.some(n=>n.id==='car'))addNote('car','Car ka radio','"…Emergency evacuation… radiation levels rising…"\n\nBar bar wahi do line. Seat par ek bachche ka khilona pada hai.');});
+  });
+},{ch:2,r:3.0,show:()=>!G.radio});
 I(rc(53)-1.55,53,'Bus mein dekho','look',()=>{say('Bus ka darwaza khula hai. Seat par ek bachche ka schoolbag… aur andar koi nahi.','arjun',4200);},{ch:2,r:4.5});
 I(barX,barZ,'Barrier uthao','open',()=>{
   if(!(G.notice&&G.radio)){
     const miss=[];if(!G.notice)miss.push('sadak ke kinare lagi notice padho');if(!G.radio)miss.push('khadi car ka radio sunno');
     say('Pehle samjhna padega yahan hua kya tha. ('+miss.join(', ')+')','arjun',4600);return;}
-  if(G.barrier)return;G.barrier=true;barCol.off=true;sting();
-  say('Barrier upar hai. Kisi ne jaldi mein chhod diya tha.','arjun',3600);refreshObj();
+  if(G.barrier)return;
+  playAnim('open',1000,()=>{G.barrier=true;barCol.off=true;sting();
+    say('Barrier upar hai. Kisi ne jaldi mein chhod diya tha.','arjun',3600);refreshObj();});
 },{ch:2,show:()=>!G.barrier,r:3.6});
 I(0,0,'Tara se baat karo','talk',()=>{
   const L=['Papa… mujhe dar lag raha hai.','Papa, woh dekho… sab chhod ke chale gaye.','Papa… aapko kuch yaad nahi, na?'];
   say(L[G.taraTalks%3],'tara',3400);G.taraTalks++;spike(0.2);
-},{pos:taraStand.position,r:2.4,ch:2,show:()=>G.taraFollow});
+},{pos:taraStand.position,r:2.4,ch:2,show:()=>false});
 /* chapter 3 */
 I(swingX-0.6,93.6,'Clip uthao','take',()=>{
+  if(!clipM.visible)return;
+  playAnim('take',900,()=>{
   addNote('clip','Tara ka hair clip','Laal clip. Jhoole ke neeche mila. Tara ke baalon mein roz yahi hota tha.\n\nAakhri baar maine usse kab dekha tha… yaad nahi aata.');clipM.visible=false;spike(0.6);
+  });
 },{ch:3,show:()=>clipM.visible,r:2.2,silent:true});
 I(swingX-0.1,93.1,'Kaagaz uthao','take',()=>{
+  if(!art2.visible)return;
+  playAnim('take',900,()=>{
   addNote('art2','Tara ki doosri drawing','Ghar jal raha hai. Do chhote figure, aur door ek bada kaala dot.\n\nNeeche likha hai: "papa".',drawArt(1).toDataURL());art2.visible=false;spike(0.7);sting();
+  });
 },{ch:3,show:()=>art2.visible,r:2.2,silent:true});
 I(fradX,108,'Purana radio sunno','listen',()=>{
   G.geigerBoost=7;staticBurst(2200);spike(0.7);
@@ -982,6 +1086,7 @@ I(fradX,108,'Purana radio sunno','listen',()=>{
 function refreshObj(){
   if(G.ch===1){
     const t=G.tasks;
+    if(!G.roomDoor){setObj('Apne kamre se bahar niklo.');return;}
     if(G.doorOpen)setObj('Bahar chalo.');
     else if(t.chai&&t.drawing&&t.calendar)setObj('Ab bahar ka darwaza khulega.');
     else setObj('Ghar mein dekho:\n['+(t.chai?'x':' ')+'] chai  ['+(t.drawing?'x':' ')+'] Tara ki drawing  ['+(t.calendar?'x':' ')+'] calendar');
@@ -993,6 +1098,7 @@ function refreshObj(){
 }
 function goal(){
   if(G.ch===1){
+    if(!G.roomDoor)return {x:-2,z:0};
     if(G.doorOpen)return {x:0,z:9};
     if(!G.tasks.chai)return {x:3.6,z:-1.2};if(!G.tasks.drawing)return {x:1.4,z:1.35};if(!G.tasks.calendar)return {x:-0.6,z:-4.8};
     return {x:0,z:4.8};
@@ -1020,7 +1126,7 @@ function setChapter(n){
   if(n===2){
     title('ADHYAY 2','Khali shahar');G.stressT=0.18;mountain.visible=true;
     taraSit.visible=false;meera.visible=false;
-    taraStand.position.set(rc(8),baseY(8),8.6);taraStand.visible=true;G.taraFollow=true;
+    taraStand.position.set(rc(17)+0.9,baseY(17),17);taraStand.visible=true;G.taraFollow=true;faceP(taraStand);setAlpha(taraStand,1);
     later(7000,()=>seq([[0,'tara','Papa… sab log kahan chale gaye?',3600],[0,'arjun','Mere paas koi jawab nahi hai.',3200]]));
   }
   if(n===3){title('ADHYAY 3','Jungle');G.stressT=0.33;redSky.visible=true;later(3000,()=>say('Hawa mein jale hue dhaatu ki boo hai.','arjun',3800));}
@@ -1110,7 +1216,7 @@ function renderActs(show){
   if(list.length){pr.textContent=list[0].label;pr.classList.add('on');}else pr.classList.remove('on');
 }
 function doInteract(it){
-  if(!G.started||G.paused||G.ended||!it)return;
+  if(!G.started||G.paused||G.ended||!it||G.animT>0)return;
   if(dlgBusy()&&!it.silent)return;
   it.fn();
 }
@@ -1148,7 +1254,9 @@ function update(dt,T){
   G.t+=dt;
   post.uniforms.fade.value=Math.min(1,G.t/1.2);
   post.uniforms.lid.value=lidAt(G.t);
-  const canMove=G.t>3.6&&!G.paused&&!G.ended;
+  if(G.animT>0)G.animT=Math.max(0,G.animT-dt);
+  if(G.darkT>0){G.darkT-=dt;if(G.darkT<=0)G.dark=0;}
+  const canMove=G.t>3.6&&!G.paused&&!G.ended&&!(G.animT>0);
   if(!G.paused)dlgUpdate(dt);
 
   if(canMove){yaw+=((K.arrowleft?1:0)-(K.arrowright?1:0))*1.9*dt;pitch+=((K.arrowup?1:0)-(K.arrowdown?1:0))*1.5*dt;pitch=Math.max(-1.2,Math.min(1.2,pitch));}
@@ -1167,6 +1275,7 @@ function update(dt,T){
   P.y=lerp(P.y,groundY(P.x,P.z),Math.min(1,dt*10));
   camera.position.set(P.x,P.y+1.65+(moving?Math.sin(bobT)*0.04:0),P.z);
   camera.rotation.set(pitch,yaw,0);
+  if(G.animT>0&&G.animK==='drink'){camera.rotation.x=pitch-0.24*Math.sin((1-G.animT/G.animD)*Math.PI);}
 
   if(G.ch===1&&G.doorOpen&&P.z>8)setChapter(2);
   else if(G.ch===2&&G.barrier&&P.z>barZ+4)setChapter(3);
@@ -1180,6 +1289,7 @@ function update(dt,T){
   const lampT=inHouse?(0.9+(G.spike>0.25?(Math.random()-0.5)*1.4:0)):0;
   lamp.intensity=lerp(lamp.intensity,Math.max(0,lampT),Math.min(1,dt*6));
   sun.intensity=inHouse?0.3:0.5;
+  deskLamp.intensity=lerp(deskLamp.intensity,(inHouse&&P.x<-1.5)?0.95:0,Math.min(1,dt*5));
 
   let near=0;
   if(G.ch===3){for(const p of patches){const d=Math.hypot(p.x-P.x,p.z-P.z)-p.r;if(d<9)near=Math.max(near,(9-Math.max(0,d))/9);}}
@@ -1187,7 +1297,7 @@ function update(dt,T){
   G.mirrorAlone=Math.max(0,G.mirrorAlone-dt);G.mirrorGhost=Math.max(0,G.mirrorGhost-dt);
   G.stress+=(G.stressT+near*0.25-G.stress)*Math.min(1,dt*1.2);
   const stress=Math.min(1,G.stress+G.spike);
-  post.uniforms.stress.value=stress;post.uniforms.red.value=Math.min(0.7,G.red);
+  post.uniforms.dark.value=G.dark;post.uniforms.stress.value=stress;post.uniforms.red.value=Math.min(0.7,G.red);
   if(droneGain)droneGain.gain.value=0.04+stress*0.08;
   if(windGain)windGain.gain.value=lerp(windGain.gain.value,inHouse?0.015:(G.ch===3?0.09:0.06),Math.min(1,dt*1.5));
 
@@ -1205,7 +1315,7 @@ function update(dt,T){
     faceP(meera);faceP(taraSit);
     if(G.burnT>0){G.burnT-=dt;setBurn(meera,true);}
     else{setBurn(meera,false);if(inHouse&&Math.random()<dt*(0.03+stress*0.3))G.burnT=0.16;}
-    if(!G.meeraHello&&Math.hypot(P.x-meera.position.x,P.z-meera.position.z)<4.6&&G.t>6){
+    if(!G.meeraHello&&G.t>6.5){
       G.meeraHello=true;seq([[0,'meera',MEERA_LINE,3000],[0,'arjun','Haan… aa raha hoon.',2400]]);
     }
     if(G.t>4.2&&!G.opened){G.opened=true;title('ADHYAY 1','Subah');refreshObj();say('Subah ho gayi… sab kuch normal lag raha hai.','arjun',3600);}
@@ -1215,19 +1325,66 @@ function update(dt,T){
     }
   }
   doorG.rotation.y=lerp(doorG.rotation.y,G.doorOpen?-1.5:0,Math.min(1,dt*2.5));
+  rdG.rotation.y=lerp(rdG.rotation.y,G.roomDoor?-1.5:0,Math.min(1,dt*3));
   barG.rotation.z=lerp(barG.rotation.z,G.barrier?1.25:0,Math.min(1,dt*2));
   if(G.taraFollow&&!G.taraVanish){
-    const tx=P.x-G.dir.x*2.0-G.dir.z*0.9,tz=P.z-G.dir.z*2.0+G.dir.x*0.9,kk=Math.min(1,dt*2.2);
-    taraStand.position.x+=(tx-taraStand.position.x)*kk;taraStand.position.z+=(tz-taraStand.position.z)*kk;
-    taraStand.position.y=groundY(taraStand.position.x,taraStand.position.z);
-    faceP(taraStand);
-    const sw=moving?Math.sin(bobT)*0.5:0;const L=taraStand.userData.legs;if(L.length){L[0].rotation.x=sw;L[1].rotation.x=-sw;}
-  }
-  if(G.ch===3){
-    if(!G.taraVanish&&P.z>80){
-      G.taraVanish=true;G.taraFollow=false;taraStand.visible=false;G.taraAt=G.t;spike(0.9);sting();G.red=0.6;
-      seq([[0,'arjun','Tara…? Tara!',2600],[0,'tara','Papa… idhar…',3200]]);setObj('Tara ko dhundho.');
+    const tz0=taraStand.position.z,tzT=Math.min(Math.max(P.z+7,12),G.barrier?86:61.5);
+    let mv=false;
+    if(tzT>tz0+0.15&&!(G.taraFade>0)){
+      const nz=Math.min(tzT,tz0+3.0*dt),nx=rc(nz)+0.9;
+      taraStand.position.set(nx,groundY(nx,nz),nz);
+      taraStand.rotation.y=Math.atan2(rc(nz+1)-rc(nz),1);mv=true;
+    }else{taraStand.position.y=groundY(taraStand.position.x,taraStand.position.z);faceP(taraStand);}
+    const sw=mv?Math.sin(G.t*7)*0.55:0,L=taraStand.userData.legs,A=taraStand.userData.arms;
+    if(L.length){L[0].rotation.x=sw;L[1].rotation.x=-sw;}
+    if(A){A[0].rotation.x=-sw*0.6;A[1].rotation.x=sw*0.6;}
+    const TL=[[36,'Papa… mujhe dar lag raha hai.'],[52,'Papa, woh dekho… sab chhod ke chale gaye.'],[72,'Papa… aapko kuch yaad nahi, na?']];
+    if(G.taraLine<TL.length&&P.z>TL[G.taraLine][0]){say(TL[G.taraLine][1],'tara',3400);G.taraLine++;spike(0.15);}
+    if(G.ch===3&&!(G.taraFade>0)&&tz0>85.4&&Math.hypot(P.x-taraStand.position.x,P.z-taraStand.position.z)<13){
+      G.taraFade=2.4;faceP(taraStand);seq([[0,'arjun','Tara…? Tara!',2600]]);
     }
+    if(G.taraFade>0){
+      G.taraFade-=dt;setAlpha(taraStand,Math.max(0,G.taraFade/2.4));spike(0.25);
+      if(G.taraFade<=0){
+        taraStand.visible=false;setAlpha(taraStand,1);G.taraVanish=true;G.taraFollow=false;G.taraAt=G.t;
+        sting();spike(0.9);G.red=0.6;say('Papa… idhar…','tara',3200);setObj('Tara ko dhundho.');
+      }
+    }
+  }
+  /* jump scares */
+  if(G.sc1>0&&G.sc1<9){
+    G.sc1t+=dt;const t=G.sc1t;
+    if(G.sc1===1&&t>2.4){G.sc1=2;G.sc1t=0;}
+    else if(G.sc1===2){
+      const fx=-Math.sin(yaw),fz=-Math.cos(yaw);
+      if(t<0.9){G.dark=Math.sin(t*38)>0?0.85:0;}
+      else if(t<2.3){
+        G.dark=0.78;scareF.visible=true;scareF.position.set(P.x+fx*1.9,0,P.z+fz*1.9);faceP(scareF);
+        if(!G.sc1a){G.sc1a=1;sting();staticBurst(900);spike(1);G.red=0.9;G.geigerBoost=8;}
+      }else{G.dark=0;scareF.visible=false;G.sc1=9;say('Meera…? Yahan koi nahi hai.','arjun',3200);}
+    }
+  }
+  if(G.ch===2&&!G.sc2&&P.z>28){
+    G.sc2=1;G.sc2t=0;const zz=P.z+17;
+    meera2.position.set(rc(zz)-0.3,baseY(zz),zz);meera2.visible=true;setBurn(meera2,true);staticBurst(500);spike(0.5);
+  }
+  if(G.sc2===1){
+    G.sc2t+=dt;faceP(meera2);
+    const d=Math.hypot(P.x-meera2.position.x,P.z-meera2.position.z);
+    if(d<9||G.sc2t>9){G.sc2=2;meera2.visible=false;sting();spike(1);G.red=0.8;pulseDark(0.9,0.12);say('…Arjun…','meera',2200);}
+  }
+  if(G.ch===3&&!G.sc3&&P.z>102){
+    const fx=-Math.sin(yaw),fz=-Math.cos(yaw);
+    if(fz<-0.6){G.sc3=1;G.sc3t=0;const bx=P.x+fx*7,bz=P.z+fz*7;scareF.visible=true;scareF.position.set(bx,GH(bx,bz),bz);setBurn(scareF,true);staticBurst(400);spike(0.4);}
+  }
+  if(G.sc3===1){G.sc3t+=dt;faceP(scareF);if(G.sc3t>1.1){G.sc3=2;G.sc3t=0;}}
+  else if(G.sc3===2){
+    G.sc3t+=dt;faceP(scareF);
+    const dx=P.x-scareF.position.x,dz=P.z-scareF.position.z,d=Math.hypot(dx,dz);
+    if(d>1.4){const st=Math.min(d-1.4,24*dt);scareF.position.x+=dx/d*st;scareF.position.z+=dz/d*st;scareF.position.y=GH(scareF.position.x,scareF.position.z);}
+    if(d<=1.5||G.sc3t>0.9){G.sc3=3;G.sc3t=0;sting();spike(1);G.red=1;staticBurst(900);G.geigerBoost=9;pulseDark(1,0.14);}
+  }else if(G.sc3===3){G.sc3t+=dt;if(G.sc3t>0.14){scareF.visible=false;G.sc3=9;}}
+  if(G.ch===3){
     if(G.taraVanish&&!G.taraSeen&&G.t-G.taraAt>4){
       G.taraSeen=true;taraStand.position.set(swingX+0.2,swingY,92.4);taraStand.rotation.y=0;taraStand.visible=true;
     }
