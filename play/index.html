@@ -213,6 +213,7 @@ function terr(x,z){
   return h;
 }
 function groundY(x,z){return (Math.abs(x)<7.6&&Math.abs(z)<7.6)?0:terr(x,z);}
+const GH=(x,z)=>Math.max(terr(x,z),baseY(z));
 function steep(x,z){return terr(x,z)-baseY(z)>2.2;}
 
 /* ================= colliders ================= */
@@ -756,7 +757,6 @@ const patches=[];
     patches.push({x,z,r});
   }
 })();
-const GH=(x,z)=>Math.max(terr(x,z),baseY(z));
 const swingX=rc(92)+7,swingY=GH(rc(92)+7,92);
 const swingG=new THREE.Group();swingG.position.set(swingX,swingY+2.6,92);world.add(swingG);
 box(0.15,2.7,0.15,swingX-1,swingY+1.35,92,0x2a1d14);box(0.15,2.7,0.15,swingX+1,swingY+1.35,92,0x2a1d14);box(2.3,0.14,0.14,swingX,swingY+2.65,92,0x2a1d14);
