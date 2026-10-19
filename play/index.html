@@ -240,6 +240,13 @@ function hitCols(x,z){
   }
   return false;
 }
+function sightBlock(x,z){
+  for(let i=0;i<cols.length;i++){const c=cols[i];if(c.off)continue;
+    if(Math.min(c.hx,c.hz)>0.35||Math.max(c.hx,c.hz)<0.8)continue;
+    const dx=x-c.cx,dz=z-c.cz,lx=dx*c.cos-dz*c.sin,lz=dx*c.sin+dz*c.cos;
+    if(Math.abs(lx)<c.hx+0.1&&Math.abs(lz)<c.hz+0.1)return true;}
+  return false;
+}
 function blocked(x,z){return z<-34||z>183||Math.abs(x)>66||steep(x,z)||hitCols(x,z);}
 
 /* ================= helpers: materials, boxes, textures ================= */
@@ -1036,7 +1043,7 @@ I(-1.9,3.3,'Aaine mein dekho','look',()=>{
 },{r:2.4});
 I(-2,0,'Darwaza kholo','open',()=>{
   if(G.roomDoor)return;
-  playAnim('open',900,()=>{G.roomDoor=true;rdCol.off=true;rdLeaf.off=false;noiseBurst(0.35,'lowpass',140,0.3);refreshObj();});
+  playAnim('open',900,()=>{G.roomDoor=true;rdCol.off=true;rdLeaf.off=false;if(hitCols(P.x,P.z))P.z=0.35;noiseBurst(0.35,'lowpass',140,0.3);refreshObj();});
 },{show:()=>!G.roomDoor,r:2.3});
 I(4.4,2.6,'Neeche ka darwaza','open',()=>{
   G.hatchN++;const n=G.hatchN;
@@ -1053,7 +1060,7 @@ I(0,4.8,'Bahar jaao','open',()=>{
   if(!(G.tasks.chai&&G.tasks.drawing&&G.tasks.calendar)){say('Abhi nahi. Ghar mein kuch adhoora lag raha hai.','arjun');return;}
   if(G.doorOpen)return;
   playAnim('open',900,()=>{
-    G.doorOpen=true;doorCol.off=true;doorLeaf.off=false;spike(0.5);G.burnT=0.3;sting();
+    G.doorOpen=true;doorCol.off=true;doorLeaf.off=false;if(hitCols(P.x,P.z))P.x=0.3;spike(0.5);G.burnT=0.3;sting();
     seq([[0,'meera','Arjun… chalo yahan se chalte hain.',3400],[0,'tara','Papa, chalo na.',2400]]);refreshObj();
   });
 },{show:()=>!G.doorOpen,r:2.3});
@@ -1216,7 +1223,7 @@ function pickTargets(){
     const dot=(dx*fx+dz*fz)/(d||1);
     if(dot<(d<1.3?0.5:0.95))continue;
     let wall=false;
-    for(let s=0.5;s<d-0.6;s+=0.3){const t=s/d;if(hitCols(P.x+dx*t,P.z+dz*t)){wall=true;break;}}
+    for(let s=0.5;s<d-0.6;s+=0.3){const t=s/d;if(sightBlock(P.x+dx*t,P.z+dz*t)){wall=true;break;}}
     if(wall)continue;
     const sc=dot*2-d/rr;
     if(sc>bs){bs=sc;best=it;}
