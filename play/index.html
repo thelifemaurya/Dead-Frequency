@@ -852,6 +852,7 @@ const swingX=rc(92)+7,swingY=GH(rc(92)+7,92);
 const swingG=new THREE.Group();swingG.position.set(swingX,swingY+2.6,92);world.add(swingG);
 box(0.15,2.7,0.15,swingX-1,swingY+1.35,92,0x2a1d14);box(0.15,2.7,0.15,swingX+1,swingY+1.35,92,0x2a1d14);box(2.3,0.14,0.14,swingX,swingY+2.65,92,0x2a1d14);
 [-0.45,0.45].forEach(k=>{const rp=new THREE.Mesh(new THREE.BoxGeometry(0.03,2,0.03),lm(0x7a6a50));rp.position.set(k,-1,0);swingG.add(rp);});
+const taraSwing=person({kind:'g',h:1.0,skin:0xbb8d6c,sit:true});taraSwing.visible=false;taraSwing.position.set(0,-2.0,0.02);taraSwing.rotation.y=Math.PI;swingG.add(taraSwing);
 const seat=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.07,0.3),lm(0x6a3a22));seat.position.set(0,-2.05,0);swingG.add(seat);
 const fradX=rc(108)-2.4,fradY=baseY(108);
 box(0.7,0.5,0.7,fradX,fradY+0.25,108,0x2a1d14,{col:true});
@@ -1449,10 +1450,10 @@ function update(dt,T){
   }else if(G.sc3===3){G.sc3t+=dt;if(G.sc3t>0.14){scareF.visible=false;G.sc3=9;}}
   if(G.ch===3){
     if(G.taraVanish&&!G.taraSeen&&G.t-G.taraAt>4){
-      G.taraSeen=true;taraStand.position.set(swingX+0.2,swingY,92.4);taraStand.rotation.y=0;taraStand.visible=true;
+      G.taraSeen=true;taraSwing.visible=true;
     }
-    if(G.taraSeen&&taraStand.visible&&Math.hypot(P.x-swingX,P.z-92)<5){
-      taraStand.visible=false;sting();spike(0.9);G.red=0.7;say('Sirf jhoola hil raha hai.','arjun',3600);setObj('Jungle ke paar hospital hai.');
+    if(G.taraSeen&&taraSwing.visible&&Math.hypot(P.x-swingX,P.z-92)<5){
+      taraSwing.visible=false;sting();spike(0.9);G.red=0.7;say('Sirf jhoola hil raha hai.','arjun',3600);setObj('Jungle ke paar hospital hai.');
     }
     if(!G.ghostDone&&P.z>112){
       if(!meera2.visible){meera2.position.set(rc(128),baseY(128),128);meera2.visible=true;}
