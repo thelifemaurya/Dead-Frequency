@@ -530,6 +530,8 @@ function person(o){
   const burntM=new THREE.MeshLambertMaterial({map:faceTex(kind,true),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
   const face=mesh(patchGeo,faceM,0,headC,0);face.scale.set(0.92,1.1,0.98);
   sph(hr*0.2,0.6,1,0.8,sk,-hr*0.9,headC-0.01*s,0);sph(hr*0.2,0.6,1,0.8,sk,hr*0.9,headC-0.01*s,0);
+  { const nz=mesh(new THREE.ConeGeometry(hr*0.15,hr*0.34,8),sk,0,headC-hr*0.12,hr*0.93);nz.rotation.x=Math.PI/2;nz.scale.set(1,1,0.8); }
+  sph(hr*0.13,1.1,0.8,0.8,sk,0,headC-hr*0.3,hr*0.96);
   cyl(0.045*s,0.052*s,0.1*s,sk,0,1.33*s,0,up,10);
   // hair cap (tilted back so forehead shows)
   function cap(rm,tilt,len,mat){const m=mesh(new THREE.SphereGeometry(hr*rm,22,14,0,Math.PI*2,0,len),mat,0,headC,0);m.scale.set(0.95,1.12,1.02);m.rotation.x=tilt;return m;}
@@ -557,7 +559,9 @@ function person(o){
     sph(0.05*s,1,1,1,sleeveM,0,0,0,arm);
     cyl(0.043*s,0.038*s,0.27*s,sleeveM,0,-0.14*s,0,arm,12);
     cyl(0.036*s,0.03*s,0.17*s,sk,0,-0.34*s,0,arm,10);
-    sph(0.04*s,1,1.2,0.85,sk,0,-0.45*s,0,arm);
+    sph(0.036*s,1,1.25,0.7,sk,0,-0.455*s,0,arm);
+    mesh(new THREE.BoxGeometry(0.05*s,0.075*s,0.024*s),sk,0,-0.515*s,0,arm);
+    sph(0.014*s,1,2,1,sk,-k*0.036*s,-0.47*s,0.016*s,arm);
     if(kind==='f'){const b=mesh(new THREE.TorusGeometry(0.036*s,0.007*s,6,14),lm(0xd4aa44),0,-0.39*s,0,arm);b.rotation.x=Math.PI/2;}
     arm.rotation.z=-k*0.05;arms.push(arm);
   });
@@ -584,8 +588,11 @@ function person(o){
     });
   }else{
     cap(1.05,-0.2,1.7,hairM);
+    sph(hr*0.95,1,0.75,0.7,hairM,0,headC+hr*0.15,-hr*0.35);
+    sph(hr*0.9,1.0,0.35,0.9,hairM,0,headC+hr*0.72,hr*0.12);
     sph(hr*0.15,1,2,0.7,hairM,-hr*0.9,headC+0.01*s,0);sph(hr*0.15,1,2,0.7,hairM,hr*0.9,headC+0.01*s,0);
   }
+  if(kind==='m'){sph(0.15*s,1,0.55,0.68,lm(0x2d2a30),0,o.sit?0.06*s:0.78*s,0,g);}
   if(kind!=='f'){
     const pc=kind==='m'?0x2d2a30:0x3a2c22,shoeM=lm(0x15100c),pm=lm(pc);
     [-1,1].forEach(k=>{
@@ -596,8 +603,11 @@ function person(o){
         sph(0.07*s,1,0.7,1.5,shoeM,0,-0.01*s,0.62*s,leg);
       }else{
         leg.position.set(k*0.085*s,0.78*s,0);
-        cyl(0.068*s,0.052*s,0.7*s,pm,0,-0.35*s,0,leg,12);
-        sph(0.068*s,1,0.7,1.7,shoeM,0,-0.74*s,0.04*s,leg);
+        cyl(0.076*s,0.06*s,0.38*s,pm,0,-0.19*s,0,leg,12);
+        sph(0.058*s,1,1,1,pm,0,-0.38*s,0,leg);
+        cyl(0.056*s,0.044*s,0.36*s,pm,0,-0.56*s,0,leg,12);
+        sph(0.07*s,1,0.62,1.8,shoeM,0,-0.74*s,0.045*s,leg);
+        mesh(new THREE.BoxGeometry(0.1*s,0.022*s,0.23*s),lm(0x0a0806),0,-0.765*s,0.04*s,leg);
         legs.push(leg);
       }
       g.add(leg);
