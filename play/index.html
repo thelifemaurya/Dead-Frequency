@@ -860,6 +860,29 @@ const patches=[];
     patches.push({x,z,r});
   }
 })();
+/* the watchers: dark faceless figures hanging in the fog */
+const watchers=[];
+(function(){
+  const bmat=new THREE.MeshBasicMaterial({color:0x07070a});
+  function mk(){
+    const g=new THREE.Group(),legs=[];
+    const add=(geo,x,y,z,sx,sy,sz)=>{const m=new THREE.Mesh(geo,bmat);m.position.set(x,y,z);if(sx)m.scale.set(sx,sy,sz);g.add(m);return m;};
+    add(new THREE.SphereGeometry(0.13,10,8),0,0.92,0,0.95,1.1,1);                  // head
+    add(new THREE.SphereGeometry(0.3,10,8),0,0.7,0,1,0.45,0.55);                    // shoulders
+    add(new THREE.SphereGeometry(0.22,10,8),0,0.3,0,1,1.8,0.6);                      // torso
+    [-1,1].forEach(k=>{
+      const arm=add(new THREE.CylinderGeometry(0.06,0.02,0.75,6),k*0.3,0.28,0,1,1,1);
+      const leg=add(new THREE.CylinderGeometry(0.09,0.012,1.05,7),k*0.09,-0.62,0,1,1,1);legs.push(leg);
+    });
+    g.scale.set(1.25,1.25,1.25);g.userData={legs:legs};return g;
+  }
+  for(let i=0;i<10;i++){
+    const w=mk(),z=30+i*15+Math.random()*8,side=i%2?1:-1,x=rc(z)+side*(7+Math.random()*14);
+    w.position.set(x,GH(x,z)+7+Math.random()*8,z);w.visible=false;
+    Object.assign(w.userData,{y0:w.position.y,drop:0,t:Math.random()*9,ph:Math.random()*6,gone:false,back:0});
+    world.add(w);watchers.push(w);
+  }
+})();
 const swingX=rc(92)+7,swingY=GH(rc(92)+7,92);
 const swingG=new THREE.Group();swingG.position.set(swingX,swingY+2.6,92);world.add(swingG);
 box(0.15,2.7,0.15,swingX-1,swingY+1.35,92,0x2a1d14);box(0.15,2.7,0.15,swingX+1,swingY+1.35,92,0x2a1d14);box(2.3,0.14,0.14,swingX,swingY+2.65,92,0x2a1d14);
@@ -1478,6 +1501,31 @@ function update(dt,T){
     swingG.rotation.x=Math.sin(G.t*0.9)*0.38;
   }
 
+  /* watchers: they only move when you are not looking at them */
+  if(G.ch>=2){
+    const fx=-Math.sin(yaw),fz=-Math.cos(yaw);
+    for(const w of watchers){
+      const u=w.userData;
+      if(u.gone){
+        if(G.t>u.back){const z=Math.min(P.z+42+Math.random()*24,176),x=rc(z)+(Math.random()<0.5?-1:1)*(8+Math.random()*12);
+          w.position.set(x,GH(x,z)+7+Math.random()*7,z);u.y0=w.position.y;u.drop=0;u.gone=false;}
+        continue;
+      }
+      w.visible=true;u.t+=dt;
+      const dx=P.x-w.position.x,dz=P.z-w.position.z,d=Math.hypot(dx,dz)||1;
+      const looking=(-dx*fx-dz*fz)/d>0.5&&d<70;
+      let ry=Math.atan2(dx,dz),cur=w.rotation.y,df=Math.atan2(Math.sin(ry-cur),Math.cos(ry-cur));
+      w.rotation.y=cur+df*Math.min(1,dt*1.2);
+      if(!looking&&d>6.5&&d<55){
+        w.position.x+=dx/d*0.9*dt;w.position.z+=dz/d*0.9*dt;
+        u.drop=Math.min(u.drop+0.45*dt,Math.max(0,u.y0-GH(w.position.x,w.position.z)-4));
+      }
+      w.position.y=u.y0-u.drop+Math.sin(u.t*0.7+u.ph)*0.3;
+      const L=w.userData.legs;if(L){L[0].rotation.z=Math.sin(u.t*0.9+u.ph)*0.07;L[1].rotation.z=-Math.sin(u.t*0.9+u.ph+1)*0.07;}
+      if(!G.watchSay&&d<48){G.watchSay=true;say('Aasman mein… koi lataka hua hai?','arjun',3200);spike(0.2);}
+      if(d<6.5){u.gone=true;w.visible=false;u.back=G.t+20;sting();spike(0.9);G.red=0.5;pulseDark(0.6,0.1);}
+    }
+  }
   /* contextual buttons, objective compass */
   if(canMove){pickTargets();}else{targets=[];}
   renderActs(canMove);
